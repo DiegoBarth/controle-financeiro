@@ -1,83 +1,64 @@
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { PeriodoContext } from '../contexts/PeriodoContext';
+import { ResumoMes } from '../components/home/ResumoMes';
 
 export function Home() {
    const navigate = useNavigate();
+   const { mes, setMes, ano, setAno } = useContext(PeriodoContext);
 
-   // depois esses valores virão da API
-   const totalEntradas = 4500;
-   const totalGastos = 3120;
-   const saldo = totalEntradas - totalGastos;
+   const meses = [
+      { value: 'all', label: 'Ano inteiro' },
+      { value: '1', label: 'Janeiro' },
+      { value: '2', label: 'Fevereiro' },
+      { value: '3', label: 'Março' },
+      { value: '4', label: 'Abril' },
+      { value: '5', label: 'Maio' },
+      { value: '6', label: 'Junho' },
+      { value: '7', label: 'Julho' },
+      { value: '8', label: 'Agosto' },
+      { value: '9', label: 'Setembro' },
+      { value: '10', label: 'Outubro' },
+      { value: '11', label: 'Novembro' },
+      { value: '12', label: 'Dezembro' },
+   ];
 
    return (
       <div style={{ padding: 16 }}>
          <h1>Dashboard</h1>
 
-         {/* RESUMO */}
-         <section style={{ display: 'grid', gap: 12 }}>
-            <ResumoCard
-               titulo="Entradas"
-               valor={totalEntradas}
-               cor="#2ecc71"
-            />
+         {/* Filtros de período */}
+         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+            <select value={mes} onChange={e => setMes(e.target.value)}>
+               {meses.map(m => (
+                  <option key={m.value} value={m.value}>
+                     {m.label}
+                  </option>
+               ))}
+            </select>
 
-            <ResumoCard
-               titulo="Gastos"
-               valor={totalGastos}
-               cor="#e74c3c"
+            <input
+               type="number"
+               value={ano}
+               onChange={e => setAno(Number(e.target.value))}
             />
+         </div>
 
-            <ResumoCard
-               titulo="Saldo"
-               valor={saldo}
-               cor={saldo >= 0 ? '#3498db' : '#e67e22'}
-            />
-         </section>
+         {/* Cards do resumo do mês */}
+         <ResumoMes />
 
          <hr style={{ margin: '24px 0' }} />
 
-         {/* AÇÕES RÁPIDAS */}
+         {/* Ações rápidas */}
          <section style={{ display: 'grid', gap: 12 }}>
             <h2>Ações rápidas</h2>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-               <button onClick={() => navigate('/receitas')}>
-                  ➕ Receitas
-               </button>
-
-               <button onClick={() => navigate('/gastos')}>
-                  ➖ Gastos
-               </button>
-
-               <button onClick={() => navigate('/compromissos')}>
-                  📅 Compromissos
-               </button>
-
-               <button disabled>
-                  📊 Dashboard (em breve)
-               </button>
+               <button onClick={() => navigate('/receitas')}>➕ Receitas</button>
+               <button onClick={() => navigate('/gastos')}>➖ Gastos</button>
+               <button onClick={() => navigate('/compromissos')}>📅 Compromissos</button>
+               <button disabled>📊 Dashboard (em breve)</button>
             </div>
          </section>
-      </div>
-   );
-}
-function ResumoCard(props: {
-   titulo: string;
-   valor: number;
-   cor: string;
-}) {
-   return (
-      <div
-         style={{
-            padding: 16,
-            borderRadius: 8,
-            background: '#f5f5f5',
-            borderLeft: `6px solid ${props.cor}`
-         }}
-      >
-         <strong>{props.titulo}</strong>
-         <h2 style={{ margin: '8px 0' }}>
-            R$ {props.valor.toFixed(2)}
-         </h2>
       </div>
    );
 }

@@ -4,42 +4,47 @@ import { GastoForm } from '../components/gastos/GastoForm';
 import { GastoGrid } from '../components/gastos/GastoGrid';
 import type { Gasto } from '../types/Gasto';
 import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
+import { usePeriodo } from '../contexts/PeriodoContext';
+import { useNavigate } from 'react-router-dom';
 
 export function Gastos() {
-   const hoje = new Date();
-
-   const [mes, setMes] = useState(String(hoje.getMonth() + 1));
-   const [ano, setAno] = useState(String(hoje.getFullYear()));
+   const { mes, ano } = usePeriodo(); // pega mês e ano do contexto da Home
    const [gastos, setGastos] = useState<Gasto[]>([]);
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
    const [dataEditada, setDataEditada] = useState('');
-
+   const [loading, setLoading] = useState(false);
+   const navigate = useNavigate();
+   // Busca gastos do mês/ano atual do contexto
    async function buscar() {
-      const res = await listarGastos(mes, ano);
+      setLoading(true);
+      const res = await listarGastos(mes, String(ano));
       setGastos(res);
+      setLoading(false);
    }
 
+   // Excluir gasto
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir este gasto?')) return;
 
       await excluirGasto(rowIndex);
 
-      setGastos(prev =>
-         prev.filter(g => g.rowIndex !== rowIndex)
-      );
+      setGastos(prev => prev.filter(g => g.rowIndex !== rowIndex));
    }
 
+   // Iniciar edição inline
    function handleEditar(gasto: Gasto) {
       setEditandoRow(gasto.rowIndex);
       setValorEditado(numeroParaMoeda(gasto.valor));
       setDataEditada(dataBRParaISO(gasto.dataPagamento));
    }
 
+   // Cancelar edição
    function cancelarEdicao() {
       setEditandoRow(null);
    }
 
+   // Salvar edição
    async function handleSalvarEdicao() {
       if (editandoRow === null) return;
 
@@ -53,13 +58,20 @@ export function Gastos() {
       buscar(); // recarrega lista
    }
 
-
+   // Sempre que o mês ou ano mudar no contexto, refaz a busca
    useEffect(() => {
       buscar();
-   }, []);
+   }, [mes, ano]);
 
    return (
       <>
+         <button
+            style={{ marginBottom: 16 }}
+            onClick={() => navigate('/')}
+         >
+            ← Voltar para Home
+         </button>
+         
          <h2>Novo gasto</h2>
          <GastoForm onSalvar={buscar} />
 
@@ -67,39 +79,22 @@ export function Gastos() {
 
          <h2>Consultar gastos</h2>
 
-         <select value={mes} onChange={e => setMes(e.target.value)}>
-            <option value="all">Ano todo</option>
-            <option value="1">Janeiro</option>
-            <option value="2">Fevereiro</option>
-            <option value="3">Março</option>
-            <option value="4">Abril</option>
-            <option value="5">Maio</option>
-            <option value="6">Junho</option>
-            <option value="7">Julho</option>
-            <option value="8">Agosto</option>
-            <option value="9">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-         </select>
-
-         <input value={ano} onChange={e => setAno(e.target.value)} />
-         <button onClick={buscar}>Buscar</button>
-
-         <GastoGrid
-            gastos={gastos}
-            onExcluir={handleExcluir}
-            editandoRow={editandoRow}
-            valorEditado={valorEditado}
-            dataEditada={dataEditada}
-            onEditar={handleEditar}
-            onCancelarEdicao={cancelarEdicao}
-            onSalvar={handleSalvarEdicao}
-            onChangeValor={setValorEditado}
-            onChangeData={setDataEditada}
-         />
-
-
+         {loading ? (
+            <p>Carregando...</p>
+         ) : (
+            <GastoGrid
+               gastos={gastos}
+               onExcluir={handleExcluir}
+               editandoRow={editandoRow}
+               valorEditado={valorEditado}
+               dataEditada={dataEditada}
+               onEditar={handleEditar}
+               onCancelarEdicao={cancelarEdicao}
+               onSalvar={handleSalvarEdicao}
+               onChangeValor={setValorEditado}
+               onChangeData={setDataEditada}
+            />
+         )}
       </>
    );
 }

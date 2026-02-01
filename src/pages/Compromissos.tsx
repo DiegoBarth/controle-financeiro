@@ -1,58 +1,66 @@
-// pages/Compromissos.tsx
 import { useEffect, useState } from 'react';
-import { excluirCompromisso, listarCompromissos, atualizarCompromisso, criarCartao, criarCompromisso } from '../api/compromissos';
+import {
+   excluirCompromisso,
+   listarCompromissos,
+   atualizarCompromisso,
+   criarCartao,
+   criarCompromisso
+} from '../api/compromissos';
 import type { Compromisso } from '../types/Compromisso';
 import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
 import { CompromissoGrid } from '../components/compromissos/CompromissoGrid';
 import { CompromissoForm } from '../components/compromissos/CompromissoForm';
+import { usePeriodo } from '../contexts/PeriodoContext';
+import { useNavigate } from 'react-router-dom';
 
 export function Compromissos() {
-   const hoje = new Date();
-
-   const [mes, setMes] = useState(String(hoje.getMonth() + 1));
-   const [ano, setAno] = useState(String(hoje.getFullYear()));
+   const { mes, ano } = usePeriodo(); // usa o período da Home
    const [compromissos, setCompromissos] = useState<Compromisso[]>([]);
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
    const [dataEditada, setDataEditada] = useState('');
+   const [loading, setLoading] = useState(false);
+   const navigate = useNavigate();
 
+   // Salvar novo compromisso ou cartão
    async function handleSalvar(payload: any) {
       if (payload.tipo === 'cartao') {
          await criarCartao(payload);
       } else {
          await criarCompromisso(payload);
       }
-
       await buscar();
    }
 
+   // Buscar compromissos do período atual
    async function buscar() {
-      const res = await listarCompromissos(mes, ano);
+      setLoading(true);
+      const res = await listarCompromissos(mes, String(ano));
       setCompromissos(res);
+      setLoading(false);
    }
 
+   // Excluir compromisso
    async function handleExcluir(rowIndex: number) {
-      if (!confirm('Deseja realmente excluir este gasto?')) return;
+      if (!confirm('Deseja realmente excluir este compromisso?')) return;
 
       await excluirCompromisso(rowIndex);
-
-      setCompromissos(prev =>
-         prev.filter(g => g.rowIndex !== rowIndex)
-      );
+      setCompromissos(prev => prev.filter(c => c.rowIndex !== rowIndex));
    }
 
+   // Iniciar edição inline
    function handleEditar(compromisso: Compromisso) {
       setEditandoRow(compromisso.rowIndex);
       setValorEditado(numeroParaMoeda(compromisso.valor));
-      setDataEditada(compromisso.dataPagamento
-         ? dataBRParaISO(compromisso.dataPagamento)
-         : '');
+      setDataEditada(compromisso.dataPagamento ? dataBRParaISO(compromisso.dataPagamento) : '');
    }
 
+   // Cancelar edição
    function cancelarEdicao() {
       setEditandoRow(null);
    }
 
+   // Salvar edição
    async function handleSalvarEdicao() {
       if (editandoRow === null) return;
 
@@ -63,64 +71,45 @@ export function Compromissos() {
       });
 
       setEditandoRow(null);
-      buscar();
+      buscar(); // recarrega lista
    }
 
+   // Sempre que o mês ou ano do contexto mudar, refaz a busca
    useEffect(() => {
       buscar();
-   }, []);
+   }, [mes, ano]);
 
    return (
       <div>
+         <button
+            style={{ marginBottom: 16 }}
+            onClick={() => navigate('/')}
+         >
+            ← Voltar para Home
+         </button>
+         
          <h2>Novo compromisso</h2>
          <CompromissoForm onSalvar={handleSalvar} />
 
          <hr />
          <h2>Compromissos</h2>
 
-         {/* filtros */}
-         <div style={{ marginBottom: 16 }}>
-            <select value={mes} onChange={e => setMes(e.target.value)}>
-               <option value="all">Ano inteiro</option>
-               <option value="1">Janeiro</option>
-               <option value="2">Fevereiro</option>
-               <option value="3">Março</option>
-               <option value="4">Abril</option>
-               <option value="5">Maio</option>
-               <option value="6">Junho</option>
-               <option value="7">Julho</option>
-               <option value="8">Agosto</option>
-               <option value="9">Setembro</option>
-               <option value="10">Outubro</option>
-               <option value="11">Novembro</option>
-               <option value="12">Dezembro</option>
-            </select>
-
-            <input
-               type="number"
-               value={ano}
-               onChange={e => setAno(e.target.value)}
-               style={{ marginLeft: 8 }}
+         {loading ? (
+            <p>Carregando...</p>
+         ) : (
+            <CompromissoGrid
+               compromissos={compromissos}
+               onExcluir={handleExcluir}
+               editandoRow={editandoRow}
+               valorEditado={valorEditado}
+               dataEditada={dataEditada}
+               onEditar={handleEditar}
+               onCancelarEdicao={cancelarEdicao}
+               onSalvar={handleSalvarEdicao}
+               onChangeValor={setValorEditado}
+               onChangeData={setDataEditada}
             />
-
-            <button onClick={buscar} style={{ marginLeft: 8 }}>
-               Buscar
-            </button>
-         </div>
-
-         <CompromissoGrid
-            compromissos={compromissos}
-            onExcluir={handleExcluir}
-            editandoRow={editandoRow}
-            valorEditado={valorEditado}
-            dataEditada={dataEditada}
-            onEditar={handleEditar}
-            onCancelarEdicao={cancelarEdicao}
-            onSalvar={handleSalvarEdicao}
-            onChangeValor={setValorEditado}
-            onChangeData={setDataEditada}
-         />
-
+         )}
       </div>
    );
 }
