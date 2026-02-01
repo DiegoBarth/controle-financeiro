@@ -23,7 +23,7 @@ export function Compromissos() {
          await criarCompromisso(payload);
       }
 
-      await buscar(); // 🔥 atualiza grid
+      await buscar();
    }
 
    async function buscar() {
@@ -63,9 +63,8 @@ export function Compromissos() {
       });
 
       setEditandoRow(null);
-      buscar(); // recarrega lista
+      buscar();
    }
-
 
    useEffect(() => {
       buscar();
