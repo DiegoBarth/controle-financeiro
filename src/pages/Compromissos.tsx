@@ -25,7 +25,7 @@ export function Compromissos() {
    // Salvar novo compromisso ou cartão
    async function handleSalvar(payload: any) {
       if (payload.tipo === 'cartao') {
-         await criarCartao(payload);
+         await criarCartao(payload, mes, String(ano));
       } else {
          await criarCompromisso(payload);
       }
@@ -44,7 +44,7 @@ export function Compromissos() {
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir este compromisso?')) return;
 
-      await excluirCompromisso(rowIndex);
+      await excluirCompromisso(rowIndex, mes, String(ano));
       setCompromissos(prev => prev.filter(c => c.rowIndex !== rowIndex));
    }
 
@@ -68,7 +68,7 @@ export function Compromissos() {
          rowIndex: editandoRow,
          valor: moedaParaNumero(valorEditado),
          dataPagamento: dataEditada
-      });
+      }, mes, String(ano));
 
       setEditandoRow(null);
       buscar(); // recarrega lista

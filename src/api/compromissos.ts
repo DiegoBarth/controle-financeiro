@@ -1,12 +1,20 @@
 import { apiGet, apiPost } from './client';
 import type { Compromisso } from '../types/Compromisso';
+import { CompromissosCache } from '../cache/compromissosCache';
 
-export function listarCompromissos(mes: string, ano: string) {
-   return apiGet<Compromisso[]>({
+export async function listarCompromissos(mes: string, ano: string) {
+   const cached = CompromissosCache.get(mes, ano);
+   if (cached) return cached;
+
+   const dados = await apiGet<Compromisso[]>({
       acao: 'listarCompromissos',
       mes,
       ano
    });
+
+   CompromissosCache.set(mes, ano, dados);
+
+   return dados;
 }
 
 export function criarCompromisso(payload: {
@@ -21,23 +29,30 @@ export function criarCompromisso(payload: {
    });
 }
 
-export function excluirCompromisso(rowIndex: number) {
-   return apiPost({
+export async function excluirCompromisso(rowIndex: number, mes: string, ano: string) {
+   const res = await apiPost({
       acao: 'excluirCompromisso',
       rowIndex
    });
+
+   CompromissosCache.remove(mes, ano, rowIndex);
+
+   return res;
 }
 
-
-export function atualizarCompromisso(payload: {
+export async function atualizarCompromisso(payload: {
    rowIndex: number;
    valor: number;
    dataPagamento: string;
-}) {
-   return apiPost({
+}, mes: string, ano: string) {
+   const res = await apiPost({
       acao: 'atualizarCompromisso',
       ...payload
    });
+
+   CompromissosCache.update(mes, ano, payload)
+
+   return res;
 }
 
 export function criarCartao(payload: {
@@ -47,7 +62,8 @@ export function criarCartao(payload: {
    valorTotal: number;
    parcelas: number;
    dataVencimento: string;
-}) {
+}, mes: string, ano: string) {
+   console.log(mes, ano);
    return apiPost({
       acao: 'criarCartao',
       ...payload

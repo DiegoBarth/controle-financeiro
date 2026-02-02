@@ -24,7 +24,7 @@ export function Receitas() {
          rowIndex: editandoRow,
          valor: moedaParaNumero(valorEditado),
          dataRecebimento: dataEditada
-      });
+      }, mes, String(ano));
 
       setEditandoRow(null);
       buscar(); // recarrega lista
@@ -42,7 +42,7 @@ export function Receitas() {
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir esta receita?')) return;
 
-      await excluirReceita(rowIndex);
+      await excluirReceita(rowIndex, mes, String(ano));
       setReceitas(prev => prev.filter(r => r.rowIndex !== rowIndex));
    }
 
