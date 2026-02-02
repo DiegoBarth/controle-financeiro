@@ -56,7 +56,7 @@ export function Home() {
                <button onClick={() => navigate('/receitas')}>➕ Receitas</button>
                <button onClick={() => navigate('/gastos')}>➖ Gastos</button>
                <button onClick={() => navigate('/compromissos')}>📅 Compromissos</button>
-               <button disabled>📊 Dashboard (em breve)</button>
+               <button onClick={() => navigate('/dashboard')}>📊 Dashboard</button>
             </div>
          </section>
       </div>
