@@ -14,8 +14,8 @@ export function Gastos() {
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
    const [loading, setLoading] = useState(false);
-   const navigate = useNavigate();
    const [persistindo, setPersistindo] = useState(false);
+   const navigate = useNavigate();
 
    async function buscar() {
       setLoading(true);
