@@ -6,7 +6,7 @@ import { PeriodoProvider } from './contexts/PeriodoContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
    <React.StrictMode>
-      <BrowserRouter basename="/controle-financeiro">
+      <BrowserRouter basename="/controle-financeiro/">
          <PeriodoProvider>
             <App />
          </PeriodoProvider>
