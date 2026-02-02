@@ -24,7 +24,7 @@ export function Cartoes({ cartoes, loading }: CartoesProps) {
                   flexDirection: 'column',
                   justifyContent: 'space-between'
                }}>
-                  <img src={c.imagem} alt={c.cartao} style={{ width: '100%', borderRadius: 8 }} />
+                  <img src={`${import.meta.env.BASE_URL}cartoes/${c.imagem}.jpg`} alt={c.cartao} style={{ width: '100%', borderRadius: 8 }} />
                   <h3>{c.cartao}</h3>
                   <p>Fatura: {numeroParaMoeda(c.totalFatura)}</p>
                   <p>Limite disponível: {numeroParaMoeda(c.limiteDisponivel)}</p>
