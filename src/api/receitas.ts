@@ -55,7 +55,7 @@ export async function atualizarReceita(payload: {
       ...payload
    });
 
-   payload.dataRecebimento = formatarDataBR(payload.dataRecebimento);
+   payload.dataRecebimento = payload.dataRecebimento ? formatarDataBR(payload.dataRecebimento) : '';
 
    receitasCache.update(mes, ano, payload);
 
