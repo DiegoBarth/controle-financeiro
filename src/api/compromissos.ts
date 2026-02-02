@@ -25,12 +25,12 @@ export async function criarCompromisso(payload: {
    dataVencimento: string;
    meses?: number;
 }) {
-   const res = await apiPost<Compromisso>({
+   const res = await apiPost<Compromisso[]>({
       acao: 'criarCompromisso',
       ...payload
    });
 
-   compromissosCache.add(res, 'dataVencimento');
+   res.forEach(p => compromissosCache.add(p, 'dataVencimento'));
 
    return res;
 }
@@ -44,12 +44,12 @@ export async function criarCartao(payload: {
    parcelas: number;
    dataVencimento: string;
 }) {
-   const res = await apiPost<Compromisso>({
+   const res = await apiPost<Compromisso[]>({
       acao: 'criarCartao',
       ...payload
    });
 
-   compromissosCache.add(res, 'dataVencimento');
+   res.forEach(p => compromissosCache.add(p, 'dataVencimento'));
 
    return res;
 }
