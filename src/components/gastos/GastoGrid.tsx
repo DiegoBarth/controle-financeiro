@@ -7,13 +7,11 @@ interface Props {
 
    editandoRow: number | null;
    valorEditado: string;
-   dataEditada: string;
 
    onEditar: (gasto: Gasto) => void;
    onCancelarEdicao: () => void;
    onSalvar: () => void;
    onChangeValor: (valor: string) => void;
-   onChangeData: (data: string) => void;
 }
 
 export function GastoGrid({
@@ -21,12 +19,10 @@ export function GastoGrid({
    onExcluir,
    editandoRow,
    valorEditado,
-   dataEditada,
    onEditar,
    onCancelarEdicao,
    onSalvar,
-   onChangeValor,
-   onChangeData
+   onChangeValor
 }: Props) {
 
    return (
@@ -59,18 +55,7 @@ export function GastoGrid({
                      )}
                   </td>
 
-                  <td>
-                     {editandoRow === g.rowIndex ? (
-                        <input
-                           type="date"
-                           value={dataEditada}
-                           onChange={e => onChangeData(e.target.value)}
-                        />
-                     ) : (
-                        g.dataPagamento
-                     )}
-                  </td>
-
+                  <td>{g.dataPagamento}</td>
 
                   <td>
                      {editandoRow !== g.rowIndex && (

@@ -3,7 +3,7 @@ import { listarGastos, excluirGasto, atualizarGasto } from '../api/gastos';
 import { GastoForm } from '../components/gastos/GastoForm';
 import { GastoGrid } from '../components/gastos/GastoGrid';
 import type { Gasto } from '../types/Gasto';
-import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
+import { numeroParaMoeda, moedaParaNumero } from '../utils/formatadores';
 import { usePeriodo } from '../contexts/PeriodoContext';
 import { useNavigate } from 'react-router-dom';
 import { gastosCache } from '../cache/gastosCache';
@@ -13,7 +13,6 @@ export function Gastos() {
    const [gastos, setGastos] = useState<Gasto[]>([]);
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
-   const [dataEditada, setDataEditada] = useState('');
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
 
@@ -36,7 +35,6 @@ export function Gastos() {
    function handleEditar(gasto: Gasto) {
       setEditandoRow(gasto.rowIndex);
       setValorEditado(numeroParaMoeda(gasto.valor));
-      setDataEditada(dataBRParaISO(gasto.dataPagamento));
    }
 
    function cancelarEdicao() {
@@ -48,8 +46,7 @@ export function Gastos() {
 
       await atualizarGasto({
          rowIndex: editandoRow,
-         valor: moedaParaNumero(valorEditado),
-         dataPagamento: dataEditada
+         valor: moedaParaNumero(valorEditado)
       }, mes, String(ano));
 
       setEditandoRow(null);
@@ -92,12 +89,10 @@ export function Gastos() {
                onExcluir={handleExcluir}
                editandoRow={editandoRow}
                valorEditado={valorEditado}
-               dataEditada={dataEditada}
                onEditar={handleEditar}
                onCancelarEdicao={cancelarEdicao}
                onSalvar={handleSalvarEdicao}
                onChangeValor={setValorEditado}
-               onChangeData={setDataEditada}
             />
          )}
       </>

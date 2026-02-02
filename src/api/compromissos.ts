@@ -80,7 +80,7 @@ export async function atualizarCompromisso(
       ...payload
    });
 
-   payload.dataPagamento = formatarDataBR(payload.dataPagamento);
+   payload.dataPagamento = payload.dataPagamento ? formatarDataBR(payload.dataPagamento) : '';
 
    compromissosCache.update(mes, ano, payload);
    return res;
