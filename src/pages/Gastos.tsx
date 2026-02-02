@@ -18,7 +18,7 @@ export function Gastos() {
    // Busca gastos do mês/ano atual do contexto
    async function buscar() {
       setLoading(true);
-      const res = await listarGastos(mes, String(ano));
+      const res = await listarGastos(mes, ano);
       setGastos(res);
       setLoading(false);
    }
@@ -27,7 +27,7 @@ export function Gastos() {
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir este gasto?')) return;
 
-      await excluirGasto(rowIndex);
+      await excluirGasto(rowIndex, mes, String(ano));
 
       setGastos(prev => prev.filter(g => g.rowIndex !== rowIndex));
    }
@@ -52,7 +52,7 @@ export function Gastos() {
          rowIndex: editandoRow,
          valor: moedaParaNumero(valorEditado),
          data: dataEditada
-      });
+      }, mes, String(ano));
 
       setEditandoRow(null);
       buscar(); // recarrega lista
