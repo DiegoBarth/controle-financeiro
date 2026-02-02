@@ -17,6 +17,7 @@ export function CompromissoForm({ onSalvar }: Props) {
    const [valorTotal, setValorTotal] = useState('');
    const [totalParcelas, setTotalParcelas] = useState<number | ''>('');
    const [dataVencimentoCartao, setDataVencimentoCartao] = useState('');
+   const [persistindo, setPersistindo] = useState(false);
 
    useEffect(() => {
       if (tipo === 'fixo' && dataVencimento) {
@@ -30,39 +31,46 @@ export function CompromissoForm({ onSalvar }: Props) {
       e.preventDefault();
       if (!tipo) return;
 
-      if (tipo === 'cartao') {
-         await criarCartao({
-            tipo: 'cartao',
-            descricao,
-            categoria,
-            cartao,
-            valorTotal: moedaParaNumero(valorTotal),
-            parcelas: Number(totalParcelas),
-            dataVencimento: dataVencimentoCartao
-         });
-      } else {
-         await criarCompromisso({
-            tipo,
-            descricao,
-            categoria,
-            valor: moedaParaNumero(valor),
-            dataVencimento,
-            meses: tipo === 'fixo' ? meses : 1
-         });
+      setPersistindo(true);
+      
+      try {
+         if (tipo === 'cartao') {
+            await criarCartao({
+               tipo: 'cartao',
+               descricao,
+               categoria,
+               cartao,
+               valorTotal: moedaParaNumero(valorTotal),
+               parcelas: Number(totalParcelas),
+               dataVencimento: dataVencimentoCartao
+            });
+         } else {
+            await criarCompromisso({
+               tipo,
+               descricao,
+               categoria,
+               valor: moedaParaNumero(valor),
+               dataVencimento,
+               meses: tipo === 'fixo' ? meses : 1
+            });
+         }
+
+         onSalvar();
+
+         setDescricao('');
+         setCategoria('');
+         setTipo('');
+         setValor('');
+         setDataVencimento('');
+         setMeses(1);
+         setCartao('');
+         setValorTotal('');
+         setTotalParcelas('');
+         setDataVencimentoCartao('');
       }
-
-      onSalvar();
-
-      setDescricao('');
-      setCategoria('');
-      setTipo('');
-      setValor('');
-      setDataVencimento('');
-      setMeses(1);
-      setCartao('');
-      setValorTotal('');
-      setTotalParcelas('');
-      setDataVencimentoCartao('');
+      finally {
+         setPersistindo(false);
+      }
    }
 
    return (
@@ -122,6 +130,7 @@ export function CompromissoForm({ onSalvar }: Props) {
                   value={valor}
                   onChange={e => setValor(formatarMoeda(e.target.value))}
                   placeholder="R$ 0,00"
+                  required
                />
 
                <br /><br />
@@ -130,6 +139,7 @@ export function CompromissoForm({ onSalvar }: Props) {
                   type="date"
                   value={dataVencimento}
                   onChange={e => setDataVencimento(e.target.value)}
+                  required
                />
 
                <br /><br />
@@ -152,7 +162,7 @@ export function CompromissoForm({ onSalvar }: Props) {
 
          {tipo === 'cartao' && (
             <>
-               <select value={cartao} onChange={e => setCartao(e.target.value)}>
+               <select value={cartao} onChange={e => setCartao(e.target.value)} required>
                   <option value="">Selecione o cartão</option>
                   <option>Bradesco</option>
                   <option>Itaú</option>
@@ -165,6 +175,7 @@ export function CompromissoForm({ onSalvar }: Props) {
                   value={valorTotal}
                   onChange={e => setValorTotal(formatarMoeda(e.target.value))}
                   placeholder="Valor total"
+                  required
                />
 
                <br /><br />
@@ -176,6 +187,7 @@ export function CompromissoForm({ onSalvar }: Props) {
                   value={totalParcelas}
                   onChange={e => setTotalParcelas(Number(e.target.value))}
                   placeholder="Total de parcelas"
+                  required
                />
 
                <br /><br />
@@ -184,13 +196,14 @@ export function CompromissoForm({ onSalvar }: Props) {
                   type="date"
                   value={dataVencimentoCartao}
                   onChange={e => setDataVencimentoCartao(e.target.value)}
+                  required
                />
 
                <br /><br />
             </>
          )}
 
-         <button>Salvar</button>
+         <button disabled={persistindo}>{persistindo ? 'Salvando...' : 'Salvar'}</button>
       </form>
    );
 }

@@ -11,6 +11,7 @@ export function GastoForm({ onSalvar }: Props) {
    const [descricao, setDescricao] = useState('');
    const [categoria, setCategoria] = useState('');
    const [valor, setValor] = useState('');
+   const [persistindo, setPersistindo] = useState(false);
 
    async function salvar(e: React.FormEvent) {
       e.preventDefault();
@@ -21,29 +22,36 @@ export function GastoForm({ onSalvar }: Props) {
          return;
       }
 
-      await criarGasto({
-         data,
-         descricao,
-         categoria,
-         valor: valorNumero
-      });
+      setPersistindo(true);
 
-      onSalvar();
+      try {
+         await criarGasto({
+            data,
+            descricao,
+            categoria,
+            valor: valorNumero
+         });
 
-      alert('Gasto salvo 💸');
+         onSalvar();
 
-      setData('');
-      setDescricao('');
-      setCategoria('');
-      setValor('');
+         alert('Gasto salvo 💸');
+
+         setData('');
+         setDescricao('');
+         setCategoria('');
+         setValor('');
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    return (
       <form onSubmit={salvar}>
-         <input type="date" value={data} onChange={e => setData(e.target.value)} />
-         <input value={descricao} onChange={e => setDescricao(e.target.value)} placeholder="Descrição" />
+         <input type="date" value={data} onChange={e => setData(e.target.value)} required />
+         <input value={descricao} onChange={e => setDescricao(e.target.value)} placeholder="Descrição" required/>
 
-         <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+         <select value={categoria} onChange={e => setCategoria(e.target.value)} required>
             <option value="">Selecione</option>
             <option>Alimentação</option>
             <option>Banco</option>
@@ -68,9 +76,10 @@ export function GastoForm({ onSalvar }: Props) {
             value={valor}
             onChange={(e) => setValor(formatarMoeda(e.target.value))}
             placeholder="R$ 0,00"
+            required
          />
 
-         <button>Salvar</button>
+         <button disabled={persistindo}>{persistindo ? 'Salvando...' : 'Salvar'}</button>
       </form>
    );
 }

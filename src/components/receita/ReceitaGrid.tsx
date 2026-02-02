@@ -9,6 +9,8 @@ interface Props {
    valorEditado: string;
    dataEditada: string;
 
+   persistindo: boolean;
+
    onEditar: (receita: Receita) => void;
    onCancelarEdicao: () => void;
    onSalvar: () => void;
@@ -26,7 +28,8 @@ export function ReceitaGrid({
    onCancelarEdicao,
    onSalvar,
    onChangeValor,
-   onChangeData
+   onChangeData,
+   persistindo
 }: Props) {
 
    return (
@@ -73,11 +76,17 @@ export function ReceitaGrid({
                   <td>
                      {editandoRow !== g.rowIndex && (
                         <>
-                           <button onClick={() => onEditar(g)}>
+                           <button
+                              onClick={() => onEditar(g)}
+                              disabled={persistindo}
+                           >
                               Editar
                            </button>
 
-                           <button onClick={() => onExcluir(g.rowIndex)}>
+                           <button
+                              onClick={() => onExcluir(g.rowIndex)}
+                              disabled={persistindo}
+                           >
                               Excluir
                            </button>
                         </>
@@ -85,11 +94,17 @@ export function ReceitaGrid({
 
                      {editandoRow === g.rowIndex && (
                         <>
-                           <button onClick={onSalvar}>
-                              Salvar
+                           <button
+                              onClick={onSalvar}
+                              disabled={persistindo}
+                           >
+                              {persistindo && editandoRow === g.rowIndex ? 'Salvando...' : 'Salvar'}
                            </button>
 
-                           <button onClick={onCancelarEdicao}>
+                           <button
+                              onClick={onCancelarEdicao}
+                              disabled={persistindo}
+                           >
                               Cancelar edição
                            </button>
                         </>

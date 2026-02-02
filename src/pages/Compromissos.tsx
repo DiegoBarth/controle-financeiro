@@ -19,6 +19,8 @@ export function Compromissos() {
    const [valorEditado, setValorEditado] = useState('');
    const [dataEditada, setDataEditada] = useState('');
    const [loading, setLoading] = useState(false);
+   const [persistindo, setPersistindo] = useState(false);
+
    const navigate = useNavigate();
 
    async function buscar() {
@@ -29,26 +31,40 @@ export function Compromissos() {
    }
 
    async function handleSalvarEdicao(scope: 'single' | 'future' = 'single') {
-      if (editandoRow === null) return;
+      if (editandoRow === null || persistindo) return;
 
-      await atualizarCompromisso({
-         rowIndex: editandoRow,
-         valor: moedaParaNumero(valorEditado),
-         dataPagamento: dataEditada,
-         scope
-      }, mes, String(ano));
+      setPersistindo(true);
 
-      setEditandoRow(null);
-      const atualizados = compromissosCache.get(mes, ano) || [];
-      setCompromissos(atualizados);
+      try {
+         await atualizarCompromisso({
+            rowIndex: editandoRow,
+            valor: moedaParaNumero(valorEditado),
+            dataPagamento: dataEditada,
+            scope
+         }, mes, String(ano));
+
+         setEditandoRow(null);
+         const atualizados = compromissosCache.get(mes, ano) || [];
+         setCompromissos(atualizados);
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    async function handleExcluir(rowIndex: number, scope: 'single' | 'future' | 'all' = 'single') {
       if (!confirm('Deseja realmente excluir?')) return;
 
-      await excluirCompromisso(rowIndex, mes, String(ano), scope);
-      const atualizados = compromissosCache.get(mes, ano) || [];
-      setCompromissos(atualizados);
+      setPersistindo(true);
+
+      try {
+         await excluirCompromisso(rowIndex, mes, String(ano), scope);
+         const atualizados = compromissosCache.get(mes, ano) || [];
+         setCompromissos(atualizados);
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    function handleEditar(compromisso: Compromisso) {
@@ -98,6 +114,7 @@ export function Compromissos() {
                onSalvar={handleSalvarEdicao}
                onChangeValor={setValorEditado}
                onChangeData={setDataEditada}
+               persistindo={persistindo}
             />
          )}
       </div>

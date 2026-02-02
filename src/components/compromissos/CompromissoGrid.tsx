@@ -9,6 +9,8 @@ interface Props {
    valorEditado: string;
    dataEditada: string;
 
+   persistindo: boolean;
+
    onEditar: (compromisso: Compromisso) => void;
    onCancelarEdicao: () => void;
    onSalvar: (scope?: 'single' | 'future') => void;
@@ -26,7 +28,8 @@ export function CompromissoGrid({
    onCancelarEdicao,
    onSalvar,
    onChangeValor,
-   onChangeData
+   onChangeData,
+   persistindo
 }: Props) {
    return (
       <table border={1} width="100%">
@@ -78,22 +81,27 @@ export function CompromissoGrid({
                   <td>
                      {editandoRow !== c.rowIndex && (
                         <>
-                           <button onClick={() => onEditar(c)}>Editar</button>
+                           <button
+                              onClick={() => onEditar(c)}
+                              disabled={persistindo}
+                           >Editar</button>
 
-                           <button onClick={() => {
-                              let scope: 'single' | 'future' | 'all' = 'single';
+                           <button
+                              onClick={() => {
+                                 let scope: 'single' | 'future' | 'all' = 'single';
 
-                              if (c.tipo === 'fixo') {
-                                 const resposta = prompt(
-                                    'Excluir apenas esta parcela (single), todas futuras (future) ou todas (all)?',
-                                    'single'
-                                 );
-                                 if (!resposta || !['single', 'future', 'all'].includes(resposta)) return;
-                                 scope = resposta as 'single' | 'future' | 'all';
-                              }
-
-                              onExcluir(c.rowIndex, scope);
-                           }}>
+                                 if (c.tipo === 'fixo') {
+                                    const resposta = prompt(
+                                       'Excluir apenas esta parcela (single), todas futuras (future) ou todas (all)?',
+                                       'single'
+                                    );
+                                    if (!resposta || !['single', 'future', 'all'].includes(resposta)) return;
+                                    scope = resposta as 'single' | 'future' | 'all';
+                                 }
+                                 onExcluir(c.rowIndex, scope);
+                              }}
+                              disabled={persistindo}
+                           >
                               Excluir
                            </button>
                         </>
@@ -101,24 +109,30 @@ export function CompromissoGrid({
 
                      {editandoRow === c.rowIndex && (
                         <>
-                           <button onClick={() => {
-                              let scope: 'single' | 'future' = 'single';
+                           <button
+                              onClick={() => {
+                                 let scope: 'single' | 'future' = 'single';
 
-                              if (c.tipo === 'fixo') {
-                                 const resposta = prompt(
-                                    'Salvar apenas esta parcela (single) ou todas futuras (future)?',
-                                    'single'
-                                 );
-                                 if (!resposta || !['single', 'future'].includes(resposta)) return;
-                                 scope = resposta as 'single' | 'future';
-                              }
+                                 if (c.tipo === 'fixo') {
+                                    const resposta = prompt(
+                                       'Salvar apenas esta parcela (single) ou todas futuras (future)?',
+                                       'single'
+                                    );
+                                    if (!resposta || !['single', 'future'].includes(resposta)) return;
+                                    scope = resposta as 'single' | 'future';
+                                 }
 
-                              onSalvar(scope);
-                           }}>
-                              Salvar
+                                 onSalvar(scope);
+                              }}
+                              disabled={persistindo}
+                           >
+                              {persistindo && editandoRow === c.rowIndex ? 'Salvando...' : 'Salvar'}
                            </button>
 
-                           <button onClick={onCancelarEdicao}>Cancelar edição</button>
+                           <button
+                              onClick={onCancelarEdicao}
+                              disabled={persistindo}
+                           >Cancelar edição</button>
                         </>
                      )}
                   </td>

@@ -8,6 +8,8 @@ interface Props {
    editandoRow: number | null;
    valorEditado: string;
 
+   persistindo: boolean;
+
    onEditar: (gasto: Gasto) => void;
    onCancelarEdicao: () => void;
    onSalvar: () => void;
@@ -19,6 +21,7 @@ export function GastoGrid({
    onExcluir,
    editandoRow,
    valorEditado,
+   persistindo,
    onEditar,
    onCancelarEdicao,
    onSalvar,
@@ -60,11 +63,17 @@ export function GastoGrid({
                   <td>
                      {editandoRow !== g.rowIndex && (
                         <>
-                           <button onClick={() => onEditar(g)}>
+                           <button
+                              onClick={() => onEditar(g)}
+                              disabled={persistindo}
+                           >
                               Editar
                            </button>
 
-                           <button onClick={() => onExcluir(g.rowIndex)}>
+                           <button
+                              onClick={() => onExcluir(g.rowIndex)}
+                              disabled={persistindo}
+                           >
                               Excluir
                            </button>
                         </>
@@ -72,11 +81,17 @@ export function GastoGrid({
 
                      {editandoRow === g.rowIndex && (
                         <>
-                           <button onClick={onSalvar}>
-                              Salvar
+                           <button
+                              onClick={onSalvar}
+                              disabled={persistindo}
+                           >
+                              {persistindo && editandoRow === g.rowIndex ? 'Salvando...' : 'Salvar'}
                            </button>
 
-                           <button onClick={onCancelarEdicao}>
+                           <button 
+                              onClick={onCancelarEdicao}
+                              disabled={persistindo}
+                           >
                               Cancelar edição
                            </button>
                         </>
