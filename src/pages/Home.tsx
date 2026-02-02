@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { PeriodoContext } from '../contexts/PeriodoContext';
 import { ResumoMes } from '../components/home/ResumoMes';
+import { usePeriodo } from '../contexts/PeriodoContext';
 
 export function Home() {
    const navigate = useNavigate();
-   const { mes, setMes, ano, setAno } = useContext(PeriodoContext);
+   const { mes, setMes, ano, setAno } = usePeriodo();
 
    const meses = [
       { value: 'all', label: 'Ano inteiro' },
@@ -25,7 +24,7 @@ export function Home() {
 
    return (
       <div style={{ padding: 16 }}>
-         <h1>Dashboard</h1>
+         <h1>Home</h1>
 
          {/* Filtros de período */}
          <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
@@ -44,7 +43,7 @@ export function Home() {
             />
          </div>
 
-         {/* Cards do resumo do mês */}
+         {/* Cards do resumo */}
          <ResumoMes />
 
          <hr style={{ margin: '24px 0' }} />
@@ -52,12 +51,11 @@ export function Home() {
          {/* Ações rápidas */}
          <section style={{ display: 'grid', gap: 12 }}>
             <h2>Ações rápidas</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-               <button onClick={() => navigate('/receitas')}>➕ Receitas</button>
-               <button onClick={() => navigate('/gastos')}>➖ Gastos</button>
-               <button onClick={() => navigate('/compromissos')}>📅 Compromissos</button>
-               <button onClick={() => navigate('/dashboard')}>📊 Dashboard</button>
-            </div>
+
+            <button onClick={() => navigate('/receitas')}>➕ Receitas</button>
+            <button onClick={() => navigate('/gastos')}>➖ Gastos</button>
+            <button onClick={() => navigate('/compromissos')}>📅 Compromissos</button>
+            <button onClick={() => navigate('/dashboard')}>📊 Dashboard</button>
          </section>
       </div>
    );
