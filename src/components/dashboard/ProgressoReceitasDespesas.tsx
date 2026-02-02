@@ -1,13 +1,14 @@
-// components/dashboard/ProgressoReceitasDespesas.tsx
 import type { ResumoCompleto } from '../../types/ResumoCompleto';
 import { numeroParaMoeda } from '../../utils/formatadores';
 
 interface ProgressoProps {
-   resumo: ResumoCompleto;
+   resumo: ResumoCompleto | null;
    loading: boolean;
 }
 
 export function ProgressoReceitasDespesas({ resumo, loading }: ProgressoProps) {
+   if(!resumo) return;
+   
    if (loading) return <p>Carregando progresso...</p>;
 
    const percRecebido = resumo.totalReceitas ? (resumo.totalRecebido / resumo.totalReceitas) * 100 : 0;
