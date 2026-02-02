@@ -9,6 +9,10 @@ export function createListCache<T extends { rowIndex: number }>() {
       return `${anoStr}-${mesStr}`;
    }
 
+   function getAll() {
+      return Object.values(cache).flat();
+   }
+
    function get(mes: string, ano: number | string) {
       return cache[getKey(mes, ano)];
    }
@@ -60,6 +64,7 @@ export function createListCache<T extends { rowIndex: number }>() {
 
    return {
       getKey,
+      getAll,
       get,
       set,
       add,

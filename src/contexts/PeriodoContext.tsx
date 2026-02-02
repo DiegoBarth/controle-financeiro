@@ -13,42 +13,43 @@ interface PeriodoContextType {
    loadingResumo: boolean;
 }
 
-const hoje = new Date();
-const mesAtual = String(hoje.getMonth() + 1);
-const anoAtual = hoje.getFullYear();
+function getPeriodoInicial() {
+   const salvo = sessionStorage.getItem('periodo');
+   if (salvo) return JSON.parse(salvo);
 
-const defaultValue: PeriodoContextType = {
-   mes: mesAtual,
+   const hoje = new Date();
+   return {
+      mes: String(hoje.getMonth() + 1),
+      ano: hoje.getFullYear()
+   };
+}
+
+const resumoInicial: ResumoCompleto = {
+   totalReceitas: 0,
+   totalGastos: 0,
+   totalCompromissos: 0,
+   totalRecebido: 0,
+   totalPago: 0,
+   totalCompromissosPagos: 0,
+   totalRecebidoMes: 0,
+   totalPagoMes: 0,
+   totalCompromissosPagosMes: 0
+};
+
+export const PeriodoContext = createContext<PeriodoContextType>({
+   mes: '',
    setMes: () => { },
-   ano: anoAtual,
+   ano: 0,
    setAno: () => { },
    resumo: null,
    loadingResumo: false
-};
-
-export const PeriodoContext = createContext<PeriodoContextType>(defaultValue);
+});
 
 export function PeriodoProvider({ children }: { children: ReactNode }) {
-   const periodoSalvo = localStorage.getItem('periodo');
+   const periodoInicial = getPeriodoInicial();
 
-   const periodoInicial = periodoSalvo
-      ? JSON.parse(periodoSalvo)
-      : { mes: mesAtual, ano: anoAtual };
-
-   const [mes, setMes] = useState(periodoInicial.mes);
-   const [ano, setAno] = useState(periodoInicial.ano);
-
-   const resumoInicial: ResumoCompleto = {
-      totalReceitas: 0,
-      totalGastos: 0,
-      totalCompromissos: 0,
-      totalRecebido: 0,
-      totalPago: 0,
-      totalCompromissosPagos: 0,
-      totalRecebidoMes: 0,
-      totalPagoMes: 0,
-      totalCompromissosPagosMes: 0
-   };
+   const [mes, setMes] = useState<string>(periodoInicial.mes);
+   const [ano, setAno] = useState<number>(periodoInicial.ano);
 
    const [resumo, setResumo] = useState<ResumoCompleto>(resumoInicial);
    const [loadingResumo, setLoadingResumo] = useState(false);
@@ -67,7 +68,8 @@ export function PeriodoProvider({ children }: { children: ReactNode }) {
 
    useEffect(() => {
       carregarResumo(mes, ano);
-      localStorage.setItem(
+
+      sessionStorage.setItem(
          'periodo',
          JSON.stringify({ mes, ano })
       );
@@ -89,5 +91,4 @@ export function PeriodoProvider({ children }: { children: ReactNode }) {
    );
 }
 
-// Hook helper
 export const usePeriodo = () => useContext(PeriodoContext);
