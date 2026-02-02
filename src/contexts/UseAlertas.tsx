@@ -1,5 +1,4 @@
 import { compromissosCache } from '../cache/compromissosCache';
-import { usePeriodo } from './PeriodoContext';
 import { useMemo, useState, useEffect } from 'react';
 
 function zerarHora(d: Date) {
@@ -9,7 +8,6 @@ function zerarHora(d: Date) {
 }
 
 export function useAlertas() {
-   const { mes, ano } = usePeriodo();
    const [tick, setTick] = useState(0);
 
    useEffect(() => {
@@ -26,8 +24,10 @@ export function useAlertas() {
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());
-      const compromissos = (compromissosCache.get(mes, ano) || [])
-         .filter(c => !c.dataPagamento && !c.pago); // ✅ só não pagos
+
+      const compromissos = compromissosCache
+         .getAll()
+         .filter(c => !c.dataPagamento && !c.pago);
 
       const vencendoHoje = compromissos.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
@@ -38,10 +38,15 @@ export function useAlertas() {
       const vencendoSemana = compromissos.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
          const data = zerarHora(new Date(a, m - 1, d));
-         const diffDias = (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24);
+         const diffDias =
+            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24);
+
          return diffDias > 0 && diffDias <= 7;
       });
 
-      return { hoje: vencendoHoje, semana: vencendoSemana };
-   }, [mes, ano, tick]);
+      return {
+         hoje: vencendoHoje,
+         semana: vencendoSemana
+      };
+   }, [tick]);
 }
