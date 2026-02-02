@@ -15,6 +15,7 @@ export function Gastos() {
    const [valorEditado, setValorEditado] = useState('');
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
+   const [persistindo, setPersistindo] = useState(false);
 
    async function buscar() {
       setLoading(true);
@@ -26,10 +27,17 @@ export function Gastos() {
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir este gasto?')) return;
 
-      await excluirGasto(rowIndex, mes, String(ano));
+      setPersistindo(true);
 
-      const atualizados = gastosCache.get(mes, ano) || [];
-      setGastos(atualizados);
+      try {
+         await excluirGasto(rowIndex, mes, String(ano));
+
+         const atualizados = gastosCache.get(mes, ano) || [];
+         setGastos(atualizados);
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    function handleEditar(gasto: Gasto) {
@@ -42,17 +50,27 @@ export function Gastos() {
    }
 
    async function handleSalvarEdicao() {
-      if (editandoRow === null) return;
+      if (editandoRow === null || persistindo) return;
 
-      await atualizarGasto({
-         rowIndex: editandoRow,
-         valor: moedaParaNumero(valorEditado)
-      }, mes, String(ano));
+      setPersistindo(true);
 
-      setEditandoRow(null);
+      try {
+         await atualizarGasto(
+            {
+               rowIndex: editandoRow,
+               valor: moedaParaNumero(valorEditado)
+            },
+            mes,
+            String(ano)
+         );
 
-      const atualizados = gastosCache.get(mes, ano) || [];
-      setGastos(atualizados);
+         setEditandoRow(null);
+
+         const atualizados = gastosCache.get(mes, ano) || [];
+         setGastos(atualizados);
+      } finally {
+         setPersistindo(false);
+      }
    }
 
    useEffect(() => {
@@ -93,7 +111,9 @@ export function Gastos() {
                onCancelarEdicao={cancelarEdicao}
                onSalvar={handleSalvarEdicao}
                onChangeValor={setValorEditado}
+               persistindo={persistindo}
             />
+
          )}
       </>
    );

@@ -11,6 +11,7 @@ export function ReceitaForm({ onSalvar }: Props) {
    const [dataRecebimento, setDataRecebimento] = useState('');
    const [descricao, setDescricao] = useState('');
    const [valor, setValor] = useState('');
+   const [persistindo, setPersistindo] = useState(false);
 
    async function handleSalvar(e: React.FormEvent) {
       e.preventDefault();
@@ -21,19 +22,26 @@ export function ReceitaForm({ onSalvar }: Props) {
          return;
       }
 
-      await criarReceita({
-         dataPrevista,
-         dataRecebimento,
-         descricao,
-         valor: valorNumero
-      });
+      setPersistindo(true);
 
-      onSalvar();
-      alert('Receita salva 💸');
-      setDataPrevista('');
-      setDataRecebimento('');
-      setDescricao('');
-      setValor('');
+      try {
+         await criarReceita({
+            dataPrevista,
+            dataRecebimento,
+            descricao,
+            valor: valorNumero
+         });
+
+         onSalvar();
+         alert('Receita salva 💸');
+         setDataPrevista('');
+         setDataRecebimento('');
+         setDescricao('');
+         setValor('');
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    return (
@@ -65,7 +73,7 @@ export function ReceitaForm({ onSalvar }: Props) {
             required
          />
 
-         <button type="submit">Salvar receita</button>
+         <button type="submit" disabled={persistindo}>{persistindo ? 'Salvando...' : 'Salvar'}</button>
       </form>
    );
 }

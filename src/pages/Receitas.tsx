@@ -15,21 +15,30 @@ export function Receitas() {
    const [valorEditado, setValorEditado] = useState('');
    const [dataEditada, setDataEditada] = useState('');
    const [loading, setLoading] = useState(false);
+   const [persistindo, setPersistindo] = useState(false);
+
    const navigate = useNavigate();
 
    async function handleSalvarEdicao() {
-      if (editandoRow === null) return;
+      if (editandoRow === null || persistindo) return;
 
-      await atualizarReceita({
-         rowIndex: editandoRow,
-         valor: moedaParaNumero(valorEditado),
-         dataRecebimento: dataEditada
-      }, mes, String(ano));
+      setPersistindo(true);
 
-      setEditandoRow(null);
+      try {
+         await atualizarReceita({
+            rowIndex: editandoRow,
+            valor: moedaParaNumero(valorEditado),
+            dataRecebimento: dataEditada
+         }, mes, String(ano));
 
-      const atualizados = receitasCache.get(mes, ano) || [];
-      setReceitas(atualizados);
+         setEditandoRow(null);
+
+         const atualizados = receitasCache.get(mes, ano) || [];
+         setReceitas(atualizados);
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    async function buscar() {
@@ -42,10 +51,17 @@ export function Receitas() {
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir esta receita?')) return;
 
-      await excluirReceita(rowIndex, mes, String(ano));
+      setPersistindo(true);
 
-      const atualizados = receitasCache.get(mes, ano) || [];
-      setReceitas(atualizados);
+      try {
+         await excluirReceita(rowIndex, mes, String(ano));
+
+         const atualizados = receitasCache.get(mes, ano) || [];
+         setReceitas(atualizados);
+      }
+      finally {
+         setPersistindo(false);
+      }
    }
 
    function handleEditar(receita: Receita) {
@@ -70,7 +86,7 @@ export function Receitas() {
          >
             ← Voltar para Home
          </button>
-         
+
          <h2>Nova receita</h2>
          <ReceitaForm
             onSalvar={() => {
@@ -97,6 +113,7 @@ export function Receitas() {
                onSalvar={handleSalvarEdicao}
                onChangeValor={setValorEditado}
                onChangeData={setDataEditada}
+               persistindo={persistindo}
             />
          )}
       </>
