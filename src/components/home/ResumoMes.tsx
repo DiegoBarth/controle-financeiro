@@ -12,7 +12,10 @@ export function ResumoMes() {
       totalCompromissos: 0,
       totalRecebido: 0,
       totalPago: 0,
-      totalCompromissosPagos: 0
+      totalCompromissosPagos: 0,
+      totalRecebidoMes: 0,
+      totalPagoMes: 0,
+      totalCompromissosPagosMes: 0
    });
 
    const [loading, setLoading] = useState(false);
