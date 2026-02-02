@@ -26,7 +26,10 @@ export function createListCache<T extends { rowIndex: number }>() {
       const key = getKey(mes, ano);
 
       if (!cache[key]) cache[key] = [];
-      cache[key].push(item);
+
+      if (!cache[key].some(c => c.rowIndex === item.rowIndex)) {
+         cache[key].push(item);
+      }
    }
 
    function remove(mes: string, ano: number | string, rowIndex: number) {

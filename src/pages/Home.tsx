@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ResumoMes } from '../components/home/ResumoMes';
 import { usePeriodo } from '../contexts/PeriodoContext';
+import { Alertas } from '../components/Alertas';
+import { listarDados } from '../api/home';
 
 export function Home() {
    const navigate = useNavigate();
@@ -22,6 +25,13 @@ export function Home() {
       { value: '12', label: 'Dezembro' },
    ];
 
+   useEffect(() => {
+      async function preload() {
+         await listarDados(mes, String(ano));
+      }
+      preload();
+   }, [mes, ano]);
+
    return (
       <div style={{ padding: 16 }}>
          <h1>Home</h1>
@@ -42,6 +52,9 @@ export function Home() {
                onChange={e => setAno(Number(e.target.value))}
             />
          </div>
+
+         {/* Cards de alertas */}
+         <Alertas />
 
          {/* Cards do resumo */}
          <ResumoMes />
