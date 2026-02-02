@@ -6,16 +6,17 @@ import type { Gasto } from '../types/Gasto';
 import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
 import { usePeriodo } from '../contexts/PeriodoContext';
 import { useNavigate } from 'react-router-dom';
+import { gastosCache } from '../cache/gastosCache';
 
 export function Gastos() {
-   const { mes, ano } = usePeriodo(); // pega mês e ano do contexto da Home
+   const { mes, ano } = usePeriodo();
    const [gastos, setGastos] = useState<Gasto[]>([]);
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
    const [dataEditada, setDataEditada] = useState('');
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
-   // Busca gastos do mês/ano atual do contexto
+
    async function buscar() {
       setLoading(true);
       const res = await listarGastos(mes, ano);
@@ -23,42 +24,40 @@ export function Gastos() {
       setLoading(false);
    }
 
-   // Excluir gasto
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir este gasto?')) return;
 
       await excluirGasto(rowIndex, mes, String(ano));
 
-      setGastos(prev => prev.filter(g => g.rowIndex !== rowIndex));
+      const atualizados = gastosCache.get(mes, ano) || [];
+      setGastos(atualizados);
    }
 
-   // Iniciar edição inline
    function handleEditar(gasto: Gasto) {
       setEditandoRow(gasto.rowIndex);
       setValorEditado(numeroParaMoeda(gasto.valor));
       setDataEditada(dataBRParaISO(gasto.dataPagamento));
    }
 
-   // Cancelar edição
    function cancelarEdicao() {
       setEditandoRow(null);
    }
 
-   // Salvar edição
    async function handleSalvarEdicao() {
       if (editandoRow === null) return;
 
       await atualizarGasto({
          rowIndex: editandoRow,
          valor: moedaParaNumero(valorEditado),
-         data: dataEditada
+         dataPagamento: dataEditada
       }, mes, String(ano));
 
       setEditandoRow(null);
-      buscar(); // recarrega lista
+
+      const atualizados = gastosCache.get(mes, ano) || [];
+      setGastos(atualizados);
    }
 
-   // Sempre que o mês ou ano mudar no contexto, refaz a busca
    useEffect(() => {
       buscar();
    }, [mes, ano]);
@@ -71,9 +70,15 @@ export function Gastos() {
          >
             ← Voltar para Home
          </button>
-         
+
          <h2>Novo gasto</h2>
-         <GastoForm onSalvar={buscar} />
+         <GastoForm
+            onSalvar={() => {
+               const atualizados = gastosCache.get(mes, ano) || [];
+
+               setGastos([...atualizados]);
+            }}
+         />
 
          <hr />
 

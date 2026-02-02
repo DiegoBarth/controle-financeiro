@@ -1,63 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { moedaParaNumero, formatarMoeda } from '../../utils/formatadores';
+import { criarCartao, criarCompromisso } from '../../api/compromissos';
 
 interface Props {
-   onSalvar: (payload: any) => Promise<void>;
+   onSalvar: () => void;
 }
-
 
 export function CompromissoForm({ onSalvar }: Props) {
    const [descricao, setDescricao] = useState('');
    const [categoria, setCategoria] = useState('');
    const [tipo, setTipo] = useState<'fixo' | 'variavel' | 'cartao' | ''>('');
-
-   // fixo / variavel
    const [valor, setValor] = useState('');
    const [dataVencimento, setDataVencimento] = useState('');
-
-   // cartao
+   const [meses, setMeses] = useState(1);
    const [cartao, setCartao] = useState('');
    const [valorTotal, setValorTotal] = useState('');
    const [totalParcelas, setTotalParcelas] = useState<number | ''>('');
    const [dataVencimentoCartao, setDataVencimentoCartao] = useState('');
 
-   function handleSubmit(e: React.FormEvent) {
-      e.preventDefault();
+   useEffect(() => {
+      if (tipo === 'fixo' && dataVencimento) {
+         const data = new Date(dataVencimento);
+         const mesesRestantes = 12 - data.getMonth();
+         setMeses(mesesRestantes);
+      }
+   }, [tipo, dataVencimento]);
 
+   async function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
       if (!tipo) return;
 
       if (tipo === 'cartao') {
-         onSalvar({
+         await criarCartao({
             tipo: 'cartao',
             descricao,
             categoria,
             cartao,
             valorTotal: moedaParaNumero(valorTotal),
-            parcelas: totalParcelas,
+            parcelas: Number(totalParcelas),
             dataVencimento: dataVencimentoCartao
          });
       } else {
-         onSalvar({
+         await criarCompromisso({
             tipo,
             descricao,
             categoria,
             valor: moedaParaNumero(valor),
-            dataVencimento
+            dataVencimento,
+            meses: tipo === 'fixo' ? meses : 1
          });
       }
 
-      // reset simples (igual gastos)
+      onSalvar();
+
       setDescricao('');
       setCategoria('');
       setTipo('');
       setValor('');
       setDataVencimento('');
+      setMeses(1);
       setCartao('');
       setValorTotal('');
       setTotalParcelas('');
       setDataVencimentoCartao('');
    }
-
 
    return (
       <form onSubmit={handleSubmit}>
@@ -109,13 +115,12 @@ export function CompromissoForm({ onSalvar }: Props) {
          </select>
 
          <br /><br />
+
          {(tipo === 'fixo' || tipo === 'variavel') && (
             <>
                <input
                   value={valor}
-                  onChange={(e) => {
-                     setValor(formatarMoeda(e.target.value));
-                  }}
+                  onChange={e => setValor(formatarMoeda(e.target.value))}
                   placeholder="R$ 0,00"
                />
 
@@ -128,15 +133,26 @@ export function CompromissoForm({ onSalvar }: Props) {
                />
 
                <br /><br />
+
+               {tipo === 'fixo' && (
+                  <>
+                     <label>Repetir por (meses):</label>
+                     <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={meses}
+                        onChange={e => setMeses(Number(e.target.value))}
+                     />
+                     <br /><br />
+                  </>
+               )}
             </>
          )}
 
          {tipo === 'cartao' && (
             <>
-               <select
-                  value={cartao}
-                  onChange={e => setCartao(e.target.value)}
-               >
+               <select value={cartao} onChange={e => setCartao(e.target.value)}>
                   <option value="">Selecione o cartão</option>
                   <option>Bradesco</option>
                   <option>Itaú</option>
@@ -147,9 +163,7 @@ export function CompromissoForm({ onSalvar }: Props) {
 
                <input
                   value={valorTotal}
-                  onChange={(e) => {
-                     setValorTotal(formatarMoeda(e.target.value));
-                  }}
+                  onChange={e => setValorTotal(formatarMoeda(e.target.value))}
                   placeholder="Valor total"
                />
 
@@ -160,9 +174,7 @@ export function CompromissoForm({ onSalvar }: Props) {
                   min={1}
                   max={60}
                   value={totalParcelas}
-                  onChange={e => {
-                     setTotalParcelas(Number(e.target.value));
-                  }}
+                  onChange={e => setTotalParcelas(Number(e.target.value))}
                   placeholder="Total de parcelas"
                />
 

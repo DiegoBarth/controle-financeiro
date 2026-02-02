@@ -3,7 +3,7 @@ import { numeroParaMoeda, formatarMoeda } from '../../utils/formatadores';
 
 interface Props {
    compromissos: Compromisso[];
-   onExcluir: (rowIndex: number) => void;
+   onExcluir: (rowIndex: number, scope?: 'single' | 'future' | 'all') => void;
 
    editandoRow: number | null;
    valorEditado: string;
@@ -11,7 +11,7 @@ interface Props {
 
    onEditar: (compromisso: Compromisso) => void;
    onCancelarEdicao: () => void;
-   onSalvar: () => void;
+   onSalvar: (scope?: 'single' | 'future') => void;
    onChangeValor: (valor: string) => void;
    onChangeData: (data: string) => void;
 }
@@ -45,15 +45,10 @@ export function CompromissoGrid({
 
          <tbody>
             {compromissos.map(c => (
-
                <tr key={c.rowIndex}>
                   <td>{c.descricao}</td>
                   <td>{c.categoria}</td>
-                  <td>
-                     {c.parcela
-                        ? `${c.parcela}/${c.totalParcelas}`
-                        : '-'}
-                  </td>
+                  <td>{c.parcela ? `${c.parcela}/${c.totalParcelas}` : '-'}</td>
                   <td>
                      {editandoRow === c.rowIndex ? (
                         <input
@@ -83,11 +78,22 @@ export function CompromissoGrid({
                   <td>
                      {editandoRow !== c.rowIndex && (
                         <>
-                           <button onClick={() => onEditar(c)}>
-                              Editar
-                           </button>
+                           <button onClick={() => onEditar(c)}>Editar</button>
 
-                           <button onClick={() => onExcluir(c.rowIndex)}>
+                           <button onClick={() => {
+                              let scope: 'single' | 'future' | 'all' = 'single';
+
+                              if (c.tipo === 'fixo') {
+                                 const resposta = prompt(
+                                    'Excluir apenas esta parcela (single), todas futuras (future) ou todas (all)?',
+                                    'single'
+                                 );
+                                 if (!resposta || !['single', 'future', 'all'].includes(resposta)) return;
+                                 scope = resposta as 'single' | 'future' | 'all';
+                              }
+
+                              onExcluir(c.rowIndex, scope);
+                           }}>
                               Excluir
                            </button>
                         </>
@@ -95,16 +101,26 @@ export function CompromissoGrid({
 
                      {editandoRow === c.rowIndex && (
                         <>
-                           <button onClick={onSalvar}>
+                           <button onClick={() => {
+                              let scope: 'single' | 'future' = 'single';
+
+                              if (c.tipo === 'fixo') {
+                                 const resposta = prompt(
+                                    'Salvar apenas esta parcela (single) ou todas futuras (future)?',
+                                    'single'
+                                 );
+                                 if (!resposta || !['single', 'future'].includes(resposta)) return;
+                                 scope = resposta as 'single' | 'future';
+                              }
+
+                              onSalvar(scope);
+                           }}>
                               Salvar
                            </button>
 
-                           <button onClick={onCancelarEdicao}>
-                              Cancelar edição
-                           </button>
+                           <button onClick={onCancelarEdicao}>Cancelar edição</button>
                         </>
                      )}
-
                   </td>
                </tr>
             ))}

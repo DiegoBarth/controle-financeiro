@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { criarGasto } from '../../api/gastos';
 import { moedaParaNumero, formatarMoeda } from '../../utils/formatadores';
-import { usePeriodo } from '../../contexts/PeriodoContext';
 
 interface Props {
    onSalvar: () => void;
 }
 
 export function GastoForm({ onSalvar }: Props) {
-   const { mes, ano } = usePeriodo();
    const [data, setData] = useState('');
    const [descricao, setDescricao] = useState('');
    const [categoria, setCategoria] = useState('');
@@ -28,10 +26,12 @@ export function GastoForm({ onSalvar }: Props) {
          descricao,
          categoria,
          valor: valorNumero
-      }, mes, String(ano));
+      });
 
       onSalvar();
+
       alert('Gasto salvo 💸');
+
       setData('');
       setDescricao('');
       setCategoria('');
@@ -66,9 +66,7 @@ export function GastoForm({ onSalvar }: Props) {
 
          <input
             value={valor}
-            onChange={(e) => {
-               setValor(formatarMoeda(e.target.value));
-            }}
+            onChange={(e) => setValor(formatarMoeda(e.target.value))}
             placeholder="R$ 0,00"
          />
 

@@ -1,20 +1,20 @@
 import { apiGet, apiPost } from './client';
 import type { Gasto } from '../types/Gasto';
 import { gastosCache } from '../cache/gastosCache';
+import { formatarDataBR } from '../utils/formatadores';
 
 export async function criarGasto(payload: {
    data: string;
    descricao: string;
    categoria: string;
    valor: number;
-}, mes: string, ano: string) {
-   console.log(mes, ano)
-   const res = await apiPost({
+}) {
+   const res = await apiPost<Gasto>({
       acao: 'criarGasto',
       ...payload
    });
 
-   // gastosCache.set(mes, ano, payload);
+   gastosCache.add(res, 'dataPagamento');
 
    return res;
 }
@@ -48,12 +48,14 @@ export async function excluirGasto(rowIndex: number, mes: string, ano: string) {
 export async function atualizarGasto(payload: {
    rowIndex: number;
    valor: number;
-   data: string;
+   dataPagamento: string;
 }, mes: string, ano: string) {
    const res = await apiPost({
       acao: 'atualizarGasto',
       ...payload
    });
+
+   payload.dataPagamento = formatarDataBR(payload.dataPagamento);
 
    gastosCache.update(mes, ano, payload);
 
