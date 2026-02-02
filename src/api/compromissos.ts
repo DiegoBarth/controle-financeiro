@@ -1,9 +1,10 @@
 import { apiGet, apiPost } from './client';
 import type { Compromisso } from '../types/Compromisso';
-import { CompromissosCache } from '../cache/compromissosCache';
+import { compromissosCache } from '../cache/compromissosCache';
+import { formatarDataBR } from '../utils/formatadores';
 
 export async function listarCompromissos(mes: string, ano: string) {
-   const cached = CompromissosCache.get(mes, ano);
+   const cached = compromissosCache.get(mes, ano);
    if (cached) return cached;
 
    const dados = await apiGet<Compromisso[]>({
@@ -12,60 +13,75 @@ export async function listarCompromissos(mes: string, ano: string) {
       ano
    });
 
-   CompromissosCache.set(mes, ano, dados);
-
+   compromissosCache.set(mes, ano, dados);
    return dados;
 }
 
-export function criarCompromisso(payload: {
+export async function criarCompromisso(payload: {
    descricao: string;
    categoria: string;
    tipo: 'fixo' | 'variavel';
    valor: number;
+   dataVencimento: string;
+   meses?: number;
 }) {
-   return apiPost({
+   const res = await apiPost<Compromisso>({
       acao: 'criarCompromisso',
       ...payload
    });
-}
 
-export async function excluirCompromisso(rowIndex: number, mes: string, ano: string) {
-   const res = await apiPost({
-      acao: 'excluirCompromisso',
-      rowIndex
-   });
-
-   CompromissosCache.remove(mes, ano, rowIndex);
+   compromissosCache.add(res, 'dataVencimento');
 
    return res;
 }
 
-export async function atualizarCompromisso(payload: {
-   rowIndex: number;
-   valor: number;
-   dataPagamento: string;
-}, mes: string, ano: string) {
+export async function criarCartao(payload: {
+   descricao: string;
+   categoria: string;
+   cartao: string;
+   valorTotal: number;
+   tipo: string;
+   parcelas: number;
+   dataVencimento: string;
+}) {
+   const res = await apiPost<Compromisso>({
+      acao: 'criarCartao',
+      ...payload
+   });
+
+   compromissosCache.add(res, 'dataVencimento');
+
+   return res;
+}
+
+export async function excluirCompromisso(
+   rowIndex: number,
+   mes: string,
+   ano: string,
+   scope: 'single' | 'future' | 'all' = 'single'
+) {
+   const res = await apiPost({
+      acao: 'excluirCompromisso',
+      rowIndex,
+      scope
+   });
+
+   compromissosCache.remove(mes, ano, rowIndex);
+   return res;
+}
+
+export async function atualizarCompromisso(
+   payload: { rowIndex: number; valor: number; dataPagamento: string; scope?: 'single' | 'future' },
+   mes: string,
+   ano: string
+) {
    const res = await apiPost({
       acao: 'atualizarCompromisso',
       ...payload
    });
 
-   CompromissosCache.update(mes, ano, payload)
+   payload.dataPagamento = formatarDataBR(payload.dataPagamento);
 
+   compromissosCache.update(mes, ano, payload);
    return res;
-}
-
-export function criarCartao(payload: {
-   descricao: string;
-   categoria: string;
-   cartao: string;
-   valorTotal: number;
-   parcelas: number;
-   dataVencimento: string;
-}, mes: string, ano: string) {
-   console.log(mes, ano);
-   return apiPost({
-      acao: 'criarCartao',
-      ...payload
-   });
 }

@@ -26,7 +26,7 @@ export function ReceitaForm({ onSalvar }: Props) {
          dataRecebimento,
          descricao,
          valor: valorNumero
-      }, "1", "2026");
+      });
 
       onSalvar();
       alert('Receita salva 💸');

@@ -6,6 +6,7 @@ import { ReceitaGrid } from '../components/receita/ReceitaGrid';
 import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
 import { usePeriodo } from '../contexts/PeriodoContext';
 import { useNavigate } from 'react-router-dom';
+import { receitasCache } from '../cache/receitasCache';
 
 export function Receitas() {
    const { mes, ano } = usePeriodo(); // pega do contexto
@@ -16,7 +17,6 @@ export function Receitas() {
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
 
-   // Salvar edição
    async function handleSalvarEdicao() {
       if (editandoRow === null) return;
 
@@ -27,10 +27,11 @@ export function Receitas() {
       }, mes, String(ano));
 
       setEditandoRow(null);
-      buscar(); // recarrega lista
+
+      const atualizados = receitasCache.get(mes, ano) || [];
+      setReceitas(atualizados);
    }
 
-   // Buscar receitas do período
    async function buscar() {
       setLoading(true);
       const res = await listarReceitas(mes, String(ano));
@@ -38,27 +39,25 @@ export function Receitas() {
       setLoading(false);
    }
 
-   // Excluir receita
    async function handleExcluir(rowIndex: number) {
       if (!confirm('Deseja realmente excluir esta receita?')) return;
 
       await excluirReceita(rowIndex, mes, String(ano));
-      setReceitas(prev => prev.filter(r => r.rowIndex !== rowIndex));
+
+      const atualizados = receitasCache.get(mes, ano) || [];
+      setReceitas(atualizados);
    }
 
-   // Iniciar edição inline
    function handleEditar(receita: Receita) {
       setEditandoRow(receita.rowIndex);
       setValorEditado(numeroParaMoeda(receita.valor));
       setDataEditada(receita.dataRecebimento ? dataBRParaISO(receita.dataRecebimento) : '');
    }
 
-   // Cancelar edição
    function cancelarEdicao() {
       setEditandoRow(null);
    }
 
-   // Sempre que mes ou ano mudar no contexto, recarrega
    useEffect(() => {
       buscar();
    }, [mes, ano]);
@@ -73,7 +72,13 @@ export function Receitas() {
          </button>
          
          <h2>Nova receita</h2>
-         <ReceitaForm onSalvar={buscar} />
+         <ReceitaForm
+            onSalvar={() => {
+               const atualizados = receitasCache.get(mes, ano) || [];
+
+               setReceitas([...atualizados]);
+            }}
+         />
 
          <hr />
          <h2>Consultar receitas</h2>

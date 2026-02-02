@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import {
    excluirCompromisso,
    listarCompromissos,
-   atualizarCompromisso,
-   criarCartao,
-   criarCompromisso
+   atualizarCompromisso
 } from '../api/compromissos';
 import type { Compromisso } from '../types/Compromisso';
 import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
@@ -12,9 +10,10 @@ import { CompromissoGrid } from '../components/compromissos/CompromissoGrid';
 import { CompromissoForm } from '../components/compromissos/CompromissoForm';
 import { usePeriodo } from '../contexts/PeriodoContext';
 import { useNavigate } from 'react-router-dom';
+import { compromissosCache } from '../cache/compromissosCache';
 
 export function Compromissos() {
-   const { mes, ano } = usePeriodo(); // usa o período da Home
+   const { mes, ano } = usePeriodo();
    const [compromissos, setCompromissos] = useState<Compromisso[]>([]);
    const [editandoRow, setEditandoRow] = useState<number | null>(null);
    const [valorEditado, setValorEditado] = useState('');
@@ -22,17 +21,6 @@ export function Compromissos() {
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
 
-   // Salvar novo compromisso ou cartão
-   async function handleSalvar(payload: any) {
-      if (payload.tipo === 'cartao') {
-         await criarCartao(payload, mes, String(ano));
-      } else {
-         await criarCompromisso(payload);
-      }
-      await buscar();
-   }
-
-   // Buscar compromissos do período atual
    async function buscar() {
       setLoading(true);
       const res = await listarCompromissos(mes, String(ano));
@@ -40,56 +28,58 @@ export function Compromissos() {
       setLoading(false);
    }
 
-   // Excluir compromisso
-   async function handleExcluir(rowIndex: number) {
-      if (!confirm('Deseja realmente excluir este compromisso?')) return;
+   async function handleSalvarEdicao(scope: 'single' | 'future' = 'single') {
+      if (editandoRow === null) return;
 
-      await excluirCompromisso(rowIndex, mes, String(ano));
-      setCompromissos(prev => prev.filter(c => c.rowIndex !== rowIndex));
+      await atualizarCompromisso({
+         rowIndex: editandoRow,
+         valor: moedaParaNumero(valorEditado),
+         dataPagamento: dataEditada,
+         scope
+      }, mes, String(ano));
+
+      setEditandoRow(null);
+      const atualizados = compromissosCache.get(mes, ano) || [];
+      setCompromissos(atualizados);
    }
 
-   // Iniciar edição inline
+   async function handleExcluir(rowIndex: number, scope: 'single' | 'future' | 'all' = 'single') {
+      if (!confirm('Deseja realmente excluir?')) return;
+
+      await excluirCompromisso(rowIndex, mes, String(ano), scope);
+      const atualizados = compromissosCache.get(mes, ano) || [];
+      setCompromissos(atualizados);
+   }
+
    function handleEditar(compromisso: Compromisso) {
       setEditandoRow(compromisso.rowIndex);
       setValorEditado(numeroParaMoeda(compromisso.valor));
       setDataEditada(compromisso.dataPagamento ? dataBRParaISO(compromisso.dataPagamento) : '');
    }
 
-   // Cancelar edição
    function cancelarEdicao() {
       setEditandoRow(null);
    }
 
-   // Salvar edição
-   async function handleSalvarEdicao() {
-      if (editandoRow === null) return;
-
-      await atualizarCompromisso({
-         rowIndex: editandoRow,
-         valor: moedaParaNumero(valorEditado),
-         dataPagamento: dataEditada
-      }, mes, String(ano));
-
-      setEditandoRow(null);
-      buscar(); // recarrega lista
-   }
-
-   // Sempre que o mês ou ano do contexto mudar, refaz a busca
    useEffect(() => {
       buscar();
    }, [mes, ano]);
 
    return (
       <div>
-         <button
-            style={{ marginBottom: 16 }}
-            onClick={() => navigate('/')}
-         >
+         <button style={{ marginBottom: 16 }} onClick={() => navigate('/')}>
             ← Voltar para Home
          </button>
-         
+
          <h2>Novo compromisso</h2>
-         <CompromissoForm onSalvar={handleSalvar} />
+         <CompromissoForm
+            onSalvar={() => {
+               const atualizados = compromissosCache.get(mes, ano) || [];
+
+               setCompromissos([...atualizados]);
+            }}
+         />
+
 
          <hr />
          <h2>Compromissos</h2>
