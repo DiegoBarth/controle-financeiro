@@ -21,7 +21,7 @@ export function createListCache<T extends { rowIndex: number }>() {
       const dataStr = item[campoData];
       if (!dataStr) return;
 
-      const [dia, mes, ano] = (dataStr as string).split('/').map(Number);
+      const [_, mes, ano] = (dataStr as string).split('/').map(Number);
 
       const key = getKey(mes, ano);
 
