@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { criarReceita } from '@/api/receitas'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
+import { useEffect } from 'react'
 
 interface Props {
    aberto: boolean
@@ -15,6 +16,16 @@ export function ModalNovaReceita({ aberto, onClose, onSalvar }: Props) {
    const [dataRecebimento, setDataRecebimento] = useState('')
    const [valor, setValor] = useState('')
    const [loading, setLoading] = useState(false)
+
+   useEffect(() => {
+      if (!aberto) {
+         setDescricao('')
+         setDataPrevista('')
+         setDataRecebimento('')
+         setValor('')
+         setLoading(false)
+      }
+   }, [aberto])
 
    async function salvar() {
       const valorNumero = moedaParaNumero(valor)
