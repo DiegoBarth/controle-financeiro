@@ -15,31 +15,31 @@ export function AcoesRapidas() {
    const navigate = useNavigate();
 
    const acoes: AcaoRapida[] = [
-   {
-      id: "novo-gasto",
-      label: "Novo Gasto",
-      icone: <Minus className="h-5 w-5" />,
-      onClick: () => navigate('/gastos'),
-   },
-   {
-      id: "nova-receita",
-      label: "Nova Receita",
-      icone: <Plus className="h-5 w-5" />,
-      onClick: () => navigate('/receitas'),
-   },
-   {
-      id: "compromissos",
-      label: "Compromissos",
-      icone: <Calendar className="h-5 w-5" />,
-      onClick: () => navigate('/compromissos'),
-   },
-   {
-      id: "dashboard",
-      label: "Dashboard",
-      icone: <BarChart3 className="h-5 w-5" />,
-      onClick: () => navigate('/dashboard'),
-   },
-]
+      {
+         id: "nova-receita",
+         label: "Receitas",
+         icone: <Plus className="h-5 w-5" />,
+         onClick: () => navigate('/receitas'),
+      },
+      {
+         id: "novo-gasto",
+         label: "Gastos",
+         icone: <Minus className="h-5 w-5" />,
+         onClick: () => navigate('/gastos'),
+      },
+      {
+         id: "compromissos",
+         label: "Compromissos",
+         icone: <Calendar className="h-5 w-5" />,
+         onClick: () => navigate('/compromissos'),
+      },
+      {
+         id: "dashboard",
+         label: "Dashboard",
+         icone: <BarChart3 className="h-5 w-5" />,
+         onClick: () => navigate('/dashboard'),
+      },
+   ]
 
    return (
       <div className="space-y-4">

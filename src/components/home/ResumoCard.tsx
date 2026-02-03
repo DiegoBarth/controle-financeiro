@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react"
 import { numeroParaMoeda } from "../../utils/formatadores"
 
 interface ResumoCardProps {
@@ -35,7 +34,6 @@ export function ResumoCard({ titulo, valor, cor, loading, icone }: ResumoCardPro
           )}
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 text-muted-foreground" />
     </div>
   )
 }

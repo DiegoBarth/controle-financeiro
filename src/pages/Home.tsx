@@ -20,7 +20,7 @@ export function Home() {
       <div className="min-h-screen bg-background">
          <div className="mx-auto max-w-lg px-4 py-6 md:max-w-2xl lg:max-w-4xl">
             
-            <header className="mb-6">
+            <header className="mb-4">
                <h1 className="mb-4 text-2xl font-bold text-foreground">Home</h1>
                <FiltrosPeriodo
                   mes={mes}
@@ -30,7 +30,7 @@ export function Home() {
                />
             </header>
 
-            <section className="mb-6">
+            <section className="mb-4">
                <Alertas />
             </section>
 
@@ -38,7 +38,7 @@ export function Home() {
                <ResumoMes />
             </section>
 
-            <section>
+            <section className="sticky bottom-0 bg-white">
                <AcoesRapidas />
             </section>
          </div>
