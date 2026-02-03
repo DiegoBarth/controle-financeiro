@@ -1,8 +1,9 @@
+import { Plus, Minus, Calendar, Wallet, TrendingUp } from "lucide-react"
+import { ResumoCard } from "./ResumoCard"
 import { usePeriodo } from '../../contexts/PeriodoContext';
-import { ResumoCard } from './ResumoCard';
 
 export function ResumoMes() {
-   const { resumo, loadingResumo } = usePeriodo();
+      const { resumo, loadingResumo } = usePeriodo();
 
    if (!resumo) return null;
 
@@ -13,12 +14,42 @@ export function ResumoMes() {
       resumo.totalRecebido - resumo.totalPago - resumo.totalCompromissosPagos;
 
    return (
-      <div style={{ display: 'grid', gap: 12 }}>
-         <ResumoCard titulo="Entradas" valor={resumo.totalReceitas} cor="#3498db" loading={loadingResumo} />
-         <ResumoCard titulo="Gastos" valor={resumo.totalGastos} cor="#e74c3c" loading={loadingResumo} />
-         <ResumoCard titulo="Compromissos" valor={resumo.totalCompromissos} cor="#f39c12" loading={loadingResumo} />
-         <ResumoCard titulo="Saldo Atual" valor={saldoAtual} cor={saldoAtual >= 0 ? '#2ecc71' : '#e74c3c'} loading={loadingResumo} />
-         <ResumoCard titulo="Saldo Final do Mês" valor={saldoFinalMes} cor={saldoFinalMes >= 0 ? '#3498db' : '#e67e22'} loading={loadingResumo} />
+      <div className="flex flex-col gap-3">
+         <ResumoCard
+            titulo="Entradas"
+            valor={resumo.totalReceitas}
+            cor="#3b82f6"
+            loading={loadingResumo}
+            icone={<Plus className="h-4 w-4" />}
+         />
+         <ResumoCard
+            titulo="Gastos"
+            valor={resumo.totalGastos}
+            cor="#ef4444"
+            loading={loadingResumo}
+            icone={<Minus className="h-4 w-4" />}
+         />
+         <ResumoCard
+            titulo="Compromissos"
+            valor={resumo.totalCompromissos}
+            cor="#f59e0b"
+            loading={loadingResumo}
+            icone={<Calendar className="h-4 w-4" />}
+         />
+         <ResumoCard
+            titulo="Saldo Atual"
+            valor={saldoAtual}
+            cor="#6366f1"
+            loading={loadingResumo}
+            icone={<Wallet className="h-4 w-4" />}
+         />
+         <ResumoCard
+            titulo="Saldo Final do Mês"
+            valor={saldoFinalMes}
+            cor="#8b5cf6"
+            loading={loadingResumo}
+            icone={<TrendingUp className="h-4 w-4" />}
+         />
       </div>
-   );
+   )
 }
