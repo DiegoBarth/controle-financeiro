@@ -1,121 +1,93 @@
-import { useEffect, useState } from 'react';
-import { listarReceitas, excluirReceita, atualizarReceita } from '../api/receitas';
-import type { Receita } from '../types/Receita';
-import { ReceitaForm } from '../components/receita/ReceitaForm';
-import { ReceitaGrid } from '../components/receita/ReceitaGrid';
-import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
-import { usePeriodo } from '../contexts/PeriodoContext';
-import { useNavigate } from 'react-router-dom';
-import { receitasCache } from '../cache/receitasCache';
+import { useEffect, useState } from 'react'
+import { listarReceitas } from '../api/receitas'
+import type { Receita } from '../types/Receita'
+import { ReceitaLista } from '@/components/receita/ReceitaLista'
+import { ModalEditarReceita } from '../components/receita/ModalEditarReceita'
+import { ModalNovaReceita } from '@/components/receita/ModalNovaReceita'
+import { usePeriodo } from '../contexts/PeriodoContext'
+import { useNavigate } from 'react-router-dom'
+import { receitasCache } from '../cache/receitasCache'
 
 export function Receitas() {
-   const { mes, ano } = usePeriodo(); // pega do contexto
-   const [receitas, setReceitas] = useState<Receita[]>([]);
-   const [editandoRow, setEditandoRow] = useState<number | null>(null);
-   const [valorEditado, setValorEditado] = useState('');
-   const [dataEditada, setDataEditada] = useState('');
-   const [loading, setLoading] = useState(false);
-   const [persistindo, setPersistindo] = useState(false);
+   const { mes, ano } = usePeriodo()
+   const [receitas, setReceitas] = useState<Receita[]>([])
+   const [loading, setLoading] = useState(false)
+   const [receitaSelecionada, setReceitaSelecionada] =
+      useState<Receita | null>(null)
+   const [modalAberto, setModalAberto] = useState(false)
 
-   const navigate = useNavigate();
-
-   async function handleSalvarEdicao() {
-      if (editandoRow === null || persistindo) return;
-
-      setPersistindo(true);
-
-      try {
-         await atualizarReceita({
-            rowIndex: editandoRow,
-            valor: moedaParaNumero(valorEditado),
-            dataRecebimento: dataEditada
-         }, mes, String(ano));
-
-         setEditandoRow(null);
-
-         const atualizados = receitasCache.get(mes, ano) || [];
-         setReceitas(atualizados);
-      }
-      finally {
-         setPersistindo(false);
-      }
-   }
+   const navigate = useNavigate()
 
    async function buscar() {
-      setLoading(true);
-      const res = await listarReceitas(mes, String(ano));
-      setReceitas(res);
-      setLoading(false);
-   }
-
-   async function handleExcluir(rowIndex: number) {
-      if (!confirm('Deseja realmente excluir esta receita?')) return;
-
-      setPersistindo(true);
-
-      try {
-         await excluirReceita(rowIndex, mes, String(ano));
-
-         const atualizados = receitasCache.get(mes, ano) || [];
-         setReceitas(atualizados);
-      }
-      finally {
-         setPersistindo(false);
-      }
-   }
-
-   function handleEditar(receita: Receita) {
-      setEditandoRow(receita.rowIndex);
-      setValorEditado(numeroParaMoeda(receita.valor));
-      setDataEditada(receita.dataRecebimento ? dataBRParaISO(receita.dataRecebimento) : '');
-   }
-
-   function cancelarEdicao() {
-      setEditandoRow(null);
+      setLoading(true)
+      const res = await listarReceitas(mes, String(ano))
+      setReceitas(res)
+      setLoading(false)
    }
 
    useEffect(() => {
-      buscar();
-   }, [mes, ano]);
+      buscar()
+   }, [mes, ano])
 
    return (
-      <>
+      <div className="p-4 max-w-3xl mx-auto">
+         {/* Voltar */}
          <button
-            style={{ marginBottom: 16 }}
+            className="mb-4 px-3 py-1 rounded-md border hover:bg-gray-100 transition"
             onClick={() => navigate('/')}
          >
-            ← Voltar para Home
+            ← Voltar
          </button>
 
-         <h2>Nova receita</h2>
-         <ReceitaForm
-            onSalvar={() => {
-               const atualizados = receitasCache.get(mes, ano) || [];
+         {/* Botão Nova Receita */}
+         <div className="flex justify-end mb-4">
+            <button
+               onClick={() => setModalAberto(true)}
+               className="
+            rounded-full px-5 py-2 text-white font-medium
+            shadow-md hover:brightness-90 transition
+          "
+               style={{ backgroundColor: 'rgb(59, 130, 246)' }}
+            >
+               + Nova receita
+            </button>
+         </div>
 
-               setReceitas([...atualizados]);
-            }}
-         />
-
-         <hr />
-         <h2>Consultar receitas</h2>
+         {/* Lista de Receitas */}
+         <h2 className="text-lg font-semibold mb-2">Receitas</h2>
 
          {loading ? (
             <p>Carregando...</p>
+         ) : receitas.length === 0 ? (
+            <p className="text-gray-500">Nenhuma receita encontrada</p>
          ) : (
-            <ReceitaGrid
+            <ReceitaLista
                receitas={receitas}
-               onExcluir={handleExcluir}
-               editandoRow={editandoRow}
-               valorEditado={valorEditado}
-               dataEditada={dataEditada}
-               onEditar={handleEditar}
-               onCancelarEdicao={cancelarEdicao}
-               onSalvar={handleSalvarEdicao}
-               onChangeValor={setValorEditado}
-               onChangeData={setDataEditada}
-               persistindo={persistindo}
+               onSelect={setReceitaSelecionada}
             />
          )}
-      </>
-   );
+
+         {/* Modal Nova Receita */}
+         <ModalNovaReceita
+            aberto={modalAberto}
+            onClose={() => setModalAberto(false)}
+            onSalvar={() => {
+               const atualizados = receitasCache.get(mes, ano) || []
+               setReceitas([...atualizados])
+            }}
+         />
+
+         {/* Modal Editar Receita */}
+         <ModalEditarReceita
+            aberto={!!receitaSelecionada}
+            receita={receitaSelecionada}
+            onClose={() => setReceitaSelecionada(null)}
+            onConfirmar={() => {
+               const atualizados = receitasCache.get(mes, ano) || []
+               setReceitas(atualizados)
+               setReceitaSelecionada(null)
+            }}
+         />
+      </div>
+   )
 }
