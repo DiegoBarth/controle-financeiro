@@ -3,6 +3,7 @@ import { criarGasto } from '@/api/gastos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
+import { useEffect } from 'react'
 
 interface Props {
    aberto: boolean
@@ -23,6 +24,16 @@ export function ModalNovoGasto({ aberto, onClose, onSalvar }: Props) {
       "Roupas", "Saúde", "Serviços", "Streaming", "Telefonia",
       "Transporte", "Viagem"
    ];
+
+   useEffect(() => {
+      if (!aberto) {
+         setDescricao('')
+         setData('')
+         setCategoria('')
+         setValor('')
+         setLoading(false)
+      }
+   }, [aberto])
 
    async function salvar() {
       const valorNumero = moedaParaNumero(valor)
