@@ -38,10 +38,8 @@ function AlertaCard({ titulo, gradientFrom, gradientTo, onClick }: AlertaCardPro
 
 import { useState } from "react"
 import { ModalCompromissos } from "./ModalCompromissos"
-import { ModalEditarCompromisso } from "./ModalEditarCompromisso"
+import { ModalEditarCompromisso } from "../compromissos/ModalEditarCompromisso"
 
-
-// text-xs opacity-80
 export function Alertas() {
    const { hoje, semana } = useAlertas()
    const [tipoAberto, setTipoAberto] = useState<"hoje" | "semana" | null>(null)

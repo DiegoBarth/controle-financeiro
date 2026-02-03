@@ -23,42 +23,53 @@ export function ModalCompromissos({
          setLista(itens)
       }
    }, [aberto, itens])
+
    if (!aberto) return null
 
    return (
-      <div className="fixed inset-0 z-50">
+      <div className="fixed inset-0 z-50 flex justify-center items-end md:items-center">
+         {/* Overlay */}
          <div
             className="absolute inset-0 bg-black/40"
             onClick={onClose}
          />
 
+         {/* Modal container */}
          <div className="
-        absolute bottom-0 left-0 right-0
-        rounded-t-2xl bg-white
-        p-4 max-h-[80vh] overflow-y-auto
-      ">
-            <div className="mb-3 flex items-center justify-between">
+            relative w-full md:w-[400px] max-h-[90vh]
+            bg-white rounded-t-2xl md:rounded-2xl
+            flex flex-col
+         ">
+            {/* Header fixo */}
+            <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
                <h2 className="text-lg font-semibold">{titulo}</h2>
-               <button onClick={onClose} className="text-sm text-muted-foreground">
+               <button
+                  onClick={onClose}
+                  className="text-sm text-muted-foreground hover:text-gray-700 transition"
+               >
                   Fechar
                </button>
             </div>
 
-            <ul className="space-y-2">
-               {lista.map(item => (
-                  <li
-                     key={item.rowIndex}
-                     className="rounded-lg border p-3 text-sm cursor-pointer hover:bg-muted"
-                     onClick={() => onSelect(item)}
-                  >
-                     <div className="font-medium">{item.descricao}</div>
-                     <div className="text-xs text-muted-foreground">
-                        Vence em {item.data}
-                     </div>
-                  </li>
-               ))}
-
-               {lista.length === 0 && (
+            {/* Conteúdo scrollável */}
+            <ul className="overflow-y-auto p-4 space-y-2 flex-1">
+               {lista.length > 0 ? (
+                  lista.map(item => (
+                     <li
+                        key={item.rowIndex}
+                        className="
+                           rounded-lg border p-3 text-sm
+                           cursor-pointer hover:bg-gray-100 transition
+                        "
+                        onClick={() => onSelect(item)}
+                     >
+                        <div className="font-medium">{item.descricao}</div>
+                        <div className="text-xs text-muted-foreground">
+                           Vence em {item.data}
+                        </div>
+                     </li>
+                  ))
+               ) : (
                   <div className="text-center text-sm text-muted-foreground py-6">
                      Nenhum compromisso pendente 🎉
                   </div>
