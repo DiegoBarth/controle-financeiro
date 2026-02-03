@@ -4,6 +4,7 @@ import { Gastos } from './pages/Gastos';
 import { Compromissos } from './pages/Compromissos';
 import { Receitas } from './pages/Receitas';
 import { Dashboard } from './pages/Dashboard';
+import './index.css';
 
 function App() {
   return (

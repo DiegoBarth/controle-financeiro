@@ -96,7 +96,6 @@ export function Compromissos() {
             }}
          />
 
-
          <hr />
          <h2>Compromissos</h2>
 

@@ -1,33 +1,41 @@
-import { numeroParaMoeda } from '../../utils/formatadores';
+import { ChevronRight } from "lucide-react"
+import { numeroParaMoeda } from "../../utils/formatadores"
 
 interface ResumoCardProps {
-   titulo: string;
-   valor: number;
-   cor?: string;
-   loading: boolean;
+  titulo: string
+  valor: number
+  cor: string
+  loading?: boolean
+  icone?: React.ReactNode
 }
 
-export function ResumoCard({ titulo, valor, cor, loading }: ResumoCardProps) {
-   const corPadrao =
-      cor ?? (valor >= 0 ? '#2ecc71' : '#e74c3c');
-
-   return (
-      <div
-         style={{
-            padding: 16,
-            borderRadius: 8,
-            background: '#f5f5f5',
-            borderLeft: `6px solid ${corPadrao}`,
-         }}
-      >
-         <strong>{titulo}</strong>
-         {loading ? (
-            <p>Carregando...</p>
-         ) : (
-            <h2 style={{ margin: '8px 0' }}>
-               {numeroParaMoeda(valor)}
-            </h2>
-         )}
+export function ResumoCard({ titulo, valor, cor, loading, icone }: ResumoCardProps) {
+  return (
+    <div
+      className="flex items-center justify-between rounded-xl bg-card p-4 shadow-sm transition-all hover:shadow-md"
+      style={{ borderLeft: `5px solid ${cor}` }}
+    >
+      <div className="flex items-center gap-3">
+        {icone && (
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-md"
+            style={{ backgroundColor: `${cor}20` }}
+          >
+            <span style={{ color: cor }}>{icone}</span>
+          </div>
+        )}
+        <div>
+          <p className="text-sm text-muted-foreground">{titulo}</p>
+          {loading ? (
+            <div className="h-6 w-24 animate-pulse rounded bg-muted" />
+          ) : (
+            <p className="text-lg font-semibold" style={{ color: cor }}>
+              {numeroParaMoeda(valor)}
+            </p>
+          )}
+        </div>
       </div>
-   );
+      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+    </div>
+  )
 }

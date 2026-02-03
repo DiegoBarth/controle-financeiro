@@ -1,29 +1,13 @@
+import { FiltrosPeriodo } from "../components/home/FiltrosPeriodo"
+import { Alertas } from "../components/home/Alertas"
+import { ResumoMes } from "../components/home/ResumoMes"
+import { AcoesRapidas } from "../components/home/AcoesRapidas"
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ResumoMes } from '../components/home/ResumoMes';
 import { usePeriodo } from '../contexts/PeriodoContext';
-import { Alertas } from '../components/Alertas';
 import { listarDados } from '../api/home';
 
 export function Home() {
-   const navigate = useNavigate();
    const { mes, setMes, ano, setAno } = usePeriodo();
-
-   const meses = [
-      { value: 'all', label: 'Ano inteiro' },
-      { value: '1', label: 'Janeiro' },
-      { value: '2', label: 'Fevereiro' },
-      { value: '3', label: 'Março' },
-      { value: '4', label: 'Abril' },
-      { value: '5', label: 'Maio' },
-      { value: '6', label: 'Junho' },
-      { value: '7', label: 'Julho' },
-      { value: '8', label: 'Agosto' },
-      { value: '9', label: 'Setembro' },
-      { value: '10', label: 'Outubro' },
-      { value: '11', label: 'Novembro' },
-      { value: '12', label: 'Dezembro' },
-   ];
 
    useEffect(() => {
       async function preload() {
@@ -33,43 +17,31 @@ export function Home() {
    }, [mes, ano]);
 
    return (
-      <div style={{ padding: 16 }}>
-         <h1>Home</h1>
+      <div className="min-h-screen bg-background">
+         <div className="mx-auto max-w-lg px-4 py-6 md:max-w-2xl lg:max-w-4xl">
+            
+            <header className="mb-6">
+               <h1 className="mb-4 text-2xl font-bold text-foreground">Home</h1>
+               <FiltrosPeriodo
+                  mes={mes}
+                  ano={ano}
+                  onMesChange={setMes}
+                  onAnoChange={setAno}
+               />
+            </header>
 
-         {/* Filtros de período */}
-         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-            <select value={mes} onChange={e => setMes(e.target.value)}>
-               {meses.map(m => (
-                  <option key={m.value} value={m.value}>
-                     {m.label}
-                  </option>
-               ))}
-            </select>
+            <section className="mb-6">
+               <Alertas />
+            </section>
 
-            <input
-               type="number"
-               value={ano}
-               onChange={e => setAno(Number(e.target.value))}
-            />
+            <section className="mb-6">
+               <ResumoMes />
+            </section>
+
+            <section>
+               <AcoesRapidas />
+            </section>
          </div>
-
-         {/* Cards de alertas */}
-         <Alertas />
-
-         {/* Cards do resumo */}
-         <ResumoMes />
-
-         <hr style={{ margin: '24px 0' }} />
-
-         {/* Ações rápidas */}
-         <section style={{ display: 'grid', gap: 12 }}>
-            <h2>Ações rápidas</h2>
-
-            <button onClick={() => navigate('/receitas')}>➕ Receitas</button>
-            <button onClick={() => navigate('/gastos')}>➖ Gastos</button>
-            <button onClick={() => navigate('/compromissos')}>📅 Compromissos</button>
-            <button onClick={() => navigate('/dashboard')}>📊 Dashboard</button>
-         </section>
       </div>
-   );
+   )
 }
