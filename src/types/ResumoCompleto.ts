@@ -8,4 +8,5 @@ export interface ResumoCompleto {
    totalRecebidoMes: number;
    totalPagoMes: number;
    totalCompromissosPagosMes: number;
+   anosDisponiveis: Array<number>
 }

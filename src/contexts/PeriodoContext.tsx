@@ -33,7 +33,8 @@ const resumoInicial: ResumoCompleto = {
    totalCompromissosPagos: 0,
    totalRecebidoMes: 0,
    totalPagoMes: 0,
-   totalCompromissosPagosMes: 0
+   totalCompromissosPagosMes: 0,
+   anosDisponiveis: []
 };
 
 export const PeriodoContext = createContext<PeriodoContextType>({

@@ -1,5 +1,3 @@
-"use client"
-
 import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,6 +6,7 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { usePeriodo } from "@/contexts/PeriodoContext"
 
 interface FiltrosPeriodoProps {
    mes: string
@@ -32,14 +31,18 @@ const meses = [
    { value: "12", label: "Dezembro" },
 ]
 
-const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
-
 export function FiltrosPeriodo({
    mes,
    ano,
    onMesChange,
    onAnoChange,
 }: FiltrosPeriodoProps) {
+   const { resumo } = usePeriodo();
+
+   const anos = resumo?.anosDisponiveis
+      ?.slice()
+      .sort((a, b) => a - b) ?? [];
+
    const mesAtual = meses.find((m) => m.value === mes)?.label || "Ano Inteiro"
 
    return (

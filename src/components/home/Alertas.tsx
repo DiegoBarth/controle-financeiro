@@ -1,77 +1,149 @@
 import { useAlertas } from "@/contexts/UseAlertas"
+import type { AlertaItem } from "@/types/AlertaItem"
 
-interface AlertaItem {
-   id: string
-   descricao: string
-   data: string
-}
 
 interface AlertaCardProps {
    titulo: string
-   itens: AlertaItem[]
    gradientFrom: string
    gradientTo: string
+   onClick?: () => void
 }
 
-function AlertaCard({ titulo, itens, gradientFrom, gradientTo }: AlertaCardProps) {
+function AlertaCard({ titulo, gradientFrom, gradientTo, onClick }: AlertaCardProps) {
    return (
-      <div
-         className="rounded-xl p-4 text-white shadow-md"
+      <button
+         onClick={onClick}
+         className="
+        w-full text-left
+        rounded-xl p-2 text-white
+        flex items-center justify-between
+        gap-2
+        active:scale-[0.98] transition
+      "
          style={{
             background: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
          }}
       >
-         <h3 className="mb-2 text-sm font-semibold">{titulo}</h3>
-         <ul className="space-y-1 text-sm">
-            {itens.map(item => (
-               <li key={item.id} className="flex items-center gap-1">
-                  <span className="text-white/80">•</span>
-                  <span>
-                     {item.descricao} ({item.data})
-                  </span>
-               </li>
-            ))}
-         </ul>
-      </div>
+         <h3 className="text-sm font-medium text-white/90 truncate">
+            {titulo}
+         </h3>
+
+         <span className="text-xs opacity-80 whitespace-nowrap">
+            Ver detalhes
+         </span>
+      </button>
    )
 }
 
+
+import { useState } from "react"
+import { ModalCompromissos } from "./ModalCompromissos"
+import { ModalEditarCompromisso } from "./ModalEditarCompromisso"
+
+
+// text-xs opacity-80
 export function Alertas() {
    const { hoje, semana } = useAlertas()
+   const [tipoAberto, setTipoAberto] = useState<"hoje" | "semana" | null>(null)
+   const [compromissoSelecionado, setCompromissoSelecionado] = useState<AlertaItem | null>(null)
+   const [removidos, setRemovidos] = useState<number[]>([])
+   const [tipoOrigem, setTipoOrigem] =
+      useState<"hoje" | "semana" | null>(null)
 
-   const vencimentosSemana: AlertaItem[] = semana.map(c => ({
-      id: String(c.rowIndex),
+
+   function voltarParaLista() {
+      if (tipoOrigem === "hoje" && vencimentosHoje.length > 0) {
+         setTipoAberto("hoje")
+      }
+
+      if (tipoOrigem === "semana" && vencimentosSemana.length > 0) {
+         setTipoAberto("semana")
+      }
+   }
+
+   function marcarComoResolvido(rowIndex: number) {
+      setRemovidos(prev => [...prev, rowIndex])
+      setCompromissoSelecionado(null)
+
+      setTimeout(() => {
+         voltarParaLista()
+      }, 0)
+   }
+
+   const vencimentosSemana: AlertaItem[] = semana.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+      rowIndex: c.rowIndex,
       descricao: c.descricao,
+      valor: c.valor,
       data: c.dataVencimento,
    }))
 
-   const vencimentosHoje: AlertaItem[] = hoje.map(c => ({
-      id: String(c.rowIndex),
+   const vencimentosHoje: AlertaItem[] = hoje.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+      rowIndex: c.rowIndex,
       descricao: c.descricao,
+      valor: c.valor,
       data: c.dataVencimento,
    }))
 
    if (!vencimentosSemana.length && !vencimentosHoje.length) return null
 
    return (
-      <div className="grid grid-cols-2 gap-3">
-         {vencimentosHoje.length > 0 && (
-            <AlertaCard
-               titulo={`${vencimentosHoje.length} ${vencimentosHoje.length == 1 ? 'conta' : 'contas'} vencendo hoje`}
-               itens={vencimentosHoje}
-               gradientFrom="#db2777"
-               gradientTo="#f472b6"
-            />
-         )}
+      <>
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {vencimentosHoje.length > 0 && (
+               <AlertaCard
+                  titulo={`${vencimentosHoje.length} conta(s) vencendo hoje`}
+                  gradientFrom="#db2777"
+                  gradientTo="#f472b6"
+                  onClick={() => setTipoAberto("hoje")}
+               />
+            )}
 
-         {vencimentosSemana.length > 0 && (
-            <AlertaCard
-               titulo="Vencimentos Semana"
-               itens={vencimentosSemana}
-               gradientFrom="#7c3aed"
-               gradientTo="#a855f7"
-            />
-         )}
-      </div>
+            {vencimentosSemana.length > 0 && (
+               <AlertaCard
+                  titulo={`${vencimentosSemana.length} conta(s) vencendo essa semana`}
+                  gradientFrom="#7c3aed"
+                  gradientTo="#a855f7"
+                  onClick={() => setTipoAberto("semana")}
+               />
+            )}
+         </div>
+
+         {/* MODAIS */}
+         <ModalCompromissos
+            aberto={tipoAberto === "hoje"}
+            titulo="Vencem hoje"
+            itens={vencimentosHoje}
+            onClose={() => setTipoAberto(null)}
+            onSelect={item => {
+               setTipoOrigem(tipoAberto)
+               setTipoAberto(null)
+               setCompromissoSelecionado(item)
+            }}
+         />
+
+         <ModalCompromissos
+            aberto={tipoAberto === "semana"}
+            titulo="Vencem essa semana"
+            itens={vencimentosSemana}
+            onClose={() => setTipoAberto(null)}
+            onSelect={item => {
+               setTipoOrigem(tipoAberto) 
+               setTipoAberto(null)
+               setCompromissoSelecionado(item)
+            }}
+         />
+
+         <ModalEditarCompromisso
+            aberto={!!compromissoSelecionado}
+            compromisso={compromissoSelecionado}
+            onClose={() => {
+               setCompromissoSelecionado(null)
+               voltarParaLista()
+            }}
+            onConfirmar={marcarComoResolvido}
+         />
+
+      </>
    )
+
 }
