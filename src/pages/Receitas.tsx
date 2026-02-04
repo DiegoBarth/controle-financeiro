@@ -7,6 +7,7 @@ import { ModalNovaReceita } from '@/components/receita/ModalNovaReceita'
 import { usePeriodo } from '../contexts/PeriodoContext'
 import { useNavigate } from 'react-router-dom'
 import { receitasCache } from '../cache/receitasCache'
+import { SkeletonLista } from '@/components/ui/SkeletonLista'
 
 export function Receitas() {
    const { mes, ano } = usePeriodo()
@@ -28,6 +29,14 @@ export function Receitas() {
    useEffect(() => {
       buscar()
    }, [mes, ano])
+
+   if (loading) {
+      return (
+         <div className="mx-auto max-w-5xl p-4">
+            <SkeletonLista />
+         </div>
+      )
+   }
 
    return (
       <div className="p-4 max-w-3xl mx-auto">

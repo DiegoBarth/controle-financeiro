@@ -1,37 +1,147 @@
-import type { Cartao } from '../../types/Dashboard';
-import { numeroParaMoeda } from '../../utils/formatadores';
+import { useState, TouchEvent, MouseEvent } from 'react'
+import type { Cartao } from '../../types/Dashboard'
+import { numeroParaMoeda } from '../../utils/formatadores'
 
-interface CartoesProps {
-   cartoes: Cartao[];
-   loading: boolean;
+interface Props {
+   cartoes: Cartao[]
+   loading: boolean
 }
 
-export function Cartoes({ cartoes, loading }: CartoesProps) {
-   if (loading) return <p>Carregando cartões...</p>;
+export function Cartoes({ cartoes, loading }: Props) {
+   const [ativo, setAtivo] = useState(0)
+   const [startX, setStartX] = useState<number | null>(null)
+   const [isDragging, setIsDragging] = useState(false)
+
+   const minSwipeDistance = 50
+
+   if (loading || !cartoes.length) return null
+
+   function estilo(index: number) {
+      const pos = index - ativo
+      const centerBase = 'translateX(-50%)'
+
+      if (pos === 0) {
+         return {
+            transform: `${centerBase} scale(1)`,
+            opacity: 1,
+            zIndex: 30,
+         }
+      }
+
+      if (pos === -1 || pos === 1) {
+         const displacement = pos === 1 ? 'calc(50% + 120px)' : 'calc(-50% - 120px)';
+
+         return {
+            transform: `translateX(${pos * 240}px) ${centerBase} translateY(-25px) scale(0.75)`,
+            opacity: 0.5,
+            zIndex: 20,
+            filter: 'brightness(0.6)'
+         }
+      }
+
+      return {
+         transform: `${centerBase} scale(0.5)`,
+         opacity: 0,
+         pointerEvents: 'none' as const,
+         zIndex: 10
+      }
+   }
+
+   const handleStart = (clientX: number) => {
+      setStartX(clientX)
+      setIsDragging(true)
+   }
+
+   const handleMove = (clientX: number) => {
+      if (!isDragging || startX === null) return
+
+      const diff = startX - clientX
+
+      if (Math.abs(diff) > minSwipeDistance) {
+         if (diff > 0 && ativo < cartoes.length - 1) {
+            setAtivo(prev => prev + 1)
+            handleEnd()
+         } else if (diff < 0 && ativo > 0) {
+            setAtivo(prev => prev - 1)
+            handleEnd()
+         }
+      }
+   }
+
+   const handleEnd = () => {
+      setIsDragging(false)
+      setStartX(null)
+   }
 
    return (
-      <div>
-         <h2>Cartões</h2>
-         <div style={{ display: 'flex', gap: 16 }}>
-            {cartoes.map(c => (
-               <div key={c.cartao} style={{
-                  width: 215,
-                  borderRadius: 12,
-                  padding: 16,
-                  color: '#fff',
-                  background: '#222',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-               }}>
-                  <img src={`${import.meta.env.BASE_URL}cartoes/${c.imagem}.jpg`} alt={c.cartao} style={{ width: '100%', borderRadius: 8 }} />
-                  <h3>{c.cartao}</h3>
-                  <p>Fatura: {numeroParaMoeda(c.totalFatura)}</p>
-                  <p>Limite disponível: {numeroParaMoeda(c.limiteDisponivel)}</p>
-                  <p>Limite total: {numeroParaMoeda(c.limiteTotal)}</p>
+      <section className="relative mt-2 h-[380px] sm:h-[420px] overflow-hidden select-none">
+         <h2 className="mb-2 text-lg font-semibold px-4 text-zinc-800">Cartões</h2>
+
+         <div
+            className="relative mx-auto h-full w-full max-w-4xl touch-pan-y"
+            onTouchStart={(e) => handleStart(e.targetTouches[0].clientX)}
+            onTouchMove={(e) => handleMove(e.targetTouches[0].clientX)}
+            onTouchEnd={handleEnd}
+
+            onMouseDown={(e) => handleStart(e.clientX)}
+            onMouseMove={(e) => handleMove(e.clientX)}
+            onMouseUp={handleEnd}
+            onMouseLeave={handleEnd}
+         >
+            {cartoes.map((c, index) => (
+               <div
+                  key={c.cartao}
+                  className={`
+              absolute left-1/2 
+              top-6 sm:top-10
+              w-[75%] sm:w-80
+              rounded-xl bg-zinc-900 p-4 text-white
+              shadow-2xl
+              transition-all duration-500 ease-out
+              ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+            `}
+                  style={estilo(index)}
+                  onClick={() => !isDragging && setAtivo(index)}
+               >
+                  <img
+                     src={`${import.meta.env.BASE_URL}cartoes/${c.imagem}.jpg`}
+                     alt={c.cartao}
+                     className="mb-3 h-44 w-full rounded-lg object-cover pointer-events-none"
+                  />
+
+                  <h3 className="font-semibold text-lg">{c.cartao}</h3>
+
+                  <div className="mt-2 space-y-1 text-xs text-zinc-300 sm:text-sm">
+                     <div className="flex justify-between border-b border-zinc-800/50 pb-1">
+                        <span>Fatura:</span>
+                        <span className="text-white font-medium">{numeroParaMoeda(c.totalFatura)}</span>
+                     </div>
+                     <div className="flex justify-between pt-1">
+                        <span>Disponível:</span>
+                        <span className="text-emerald-400 font-medium">{numeroParaMoeda(c.limiteDisponivel)}</span>
+                     </div>
+                  </div>
                </div>
             ))}
          </div>
-      </div>
-   );
-}
+
+         {/* Setas visíveis apenas no Desktop para melhor UX */}
+         <div className="hidden lg:block">
+            <button
+               onClick={() => setAtivo(a => Math.max(0, a - 1))}
+               disabled={ativo === 0}
+               className="absolute top-1/2 left-10 -translate-y-1/2 z-50 bg-white/80 p-3 rounded-full shadow-lg hover:bg-white disabled:opacity-0 transition-all"
+            >
+               ←
+            </button>
+            <button
+               onClick={() => setAtivo(a => Math.min(cartoes.length - 1, a + 1))}
+               disabled={ativo === cartoes.length - 1}
+               className="absolute top-1/2 right-10 -translate-y-1/2 z-50 bg-white/80 p-3 rounded-full shadow-lg hover:bg-white disabled:opacity-0 transition-all"
+            >
+               →
+            </button>
+         </div>
+      </section>
+   )
+}  

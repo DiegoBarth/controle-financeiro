@@ -1,46 +1,70 @@
-import type { ResumoCompleto } from '../../types/ResumoCompleto';
-import { numeroParaMoeda } from '../../utils/formatadores';
+import type { ResumoCompleto } from '../../types/ResumoCompleto'
+import { numeroParaMoeda } from '../../utils/formatadores'
 
-interface ProgressoProps {
-   resumo: ResumoCompleto | null;
-   loading: boolean;
+interface Props {
+   resumo: ResumoCompleto | null
+   loading: boolean
 }
 
-export function ProgressoReceitasDespesas({ resumo, loading }: ProgressoProps) {
-   if(!resumo) return;
-   
-   if (loading) return <p>Carregando progresso...</p>;
+export function ProgressoReceitasDespesas({ resumo, loading }: Props) {
+   if (loading || !resumo) return null
 
-   const percRecebido = resumo.totalReceitas ? (resumo.totalRecebido / resumo.totalReceitas) * 100 : 0;
-   const percPago = resumo.totalGastos ? (resumo.totalPago / resumo.totalGastos) * 100 : 0;
+   const percRecebido = resumo.totalReceitas
+      ? (resumo.totalRecebidoMes / resumo.totalReceitas) * 100
+      : 0
+
+   const percPago = resumo.totalGastos
+      ? ((resumo.totalPagoMes + resumo.totalCompromissosPagosMes) /
+         (resumo.totalGastos + resumo.totalCompromissos)) *
+      100
+      : 0
 
    return (
-      <div>
-         <h2>Progresso</h2>
+      <section className="rounded-xl border bg-card p-4">
+         <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+            Progresso do mês
+         </h2>
 
-         <div style={{ marginBottom: 16 }}>
-            <strong>Receitas: {numeroParaMoeda(resumo.totalRecebidoMes)} de {numeroParaMoeda(resumo.totalReceitas)}</strong>
-            <div style={{ background: '#eee', height: 16, borderRadius: 8 }}>
-               <div style={{
-                  width: `${percRecebido}%`,
-                  height: '100%',
-                  background: '#2ecc71',
-                  borderRadius: 8
-               }} />
+         <div className="space-y-4">
+            {/* Receitas */}
+            <div>
+               <div className="mb-1 flex justify-between text-sm">
+                  <span>Receitas</span>
+                  <span className="text-muted-foreground">
+                     {numeroParaMoeda(resumo.totalRecebidoMes)} /{' '}
+                     {numeroParaMoeda(resumo.totalReceitas)}
+                  </span>
+               </div>
+               <div className="h-2 rounded-full bg-muted">
+                  <div
+                     className="h-2 rounded-full bg-emerald-500"
+                     style={{ width: `${percRecebido}%` }}
+                  />
+               </div>
+            </div>
+
+            {/* Despesas */}
+            <div>
+               <div className="mb-1 flex justify-between text-sm">
+                  <span>Despesas</span>
+                  <span className="text-muted-foreground">
+                     {numeroParaMoeda(
+                        resumo.totalPagoMes + resumo.totalCompromissosPagosMes
+                     )}{' '}
+                     /{' '}
+                     {numeroParaMoeda(
+                        resumo.totalGastos + resumo.totalCompromissos
+                     )}
+                  </span>
+               </div>
+               <div className="h-2 rounded-full bg-muted">
+                  <div
+                     className="h-2 rounded-full bg-red-500"
+                     style={{ width: `${percPago}%` }}
+                  />
+               </div>
             </div>
          </div>
-
-         <div>
-            <strong>Despesas: {numeroParaMoeda(resumo.totalPagoMes + resumo.totalCompromissosPagosMes)} de {numeroParaMoeda(resumo.totalGastos + resumo.totalCompromissos)}</strong>
-            <div style={{ background: '#eee', height: 16, borderRadius: 8 }}>
-               <div style={{
-                  width: `${percPago}%`,
-                  height: '100%',
-                  background: '#e74c3c',
-                  borderRadius: 8
-               }} />
-            </div>
-         </div>
-      </div>
-   );
+      </section>
+   )
 }

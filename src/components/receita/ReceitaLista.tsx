@@ -75,6 +75,7 @@ export function ReceitaLista({ receitas, onSelect }: Props) {
           col-span-12 grid grid-cols-12 items-center p-4
           rounded-lg border cursor-pointer transition
           hover:shadow-md
+          ${recebida ? 'border-green-500/40 bg-green-50' : ''}
         `}
                   >
                      <div className="col-span-4 font-medium">
@@ -90,7 +91,7 @@ export function ReceitaLista({ receitas, onSelect }: Props) {
                      </div>
 
                      <div
-                        className={`col-span-2 text-right font-medium ${recebida ? 'text-green-600' : 'text-amber-500'
+                        className={`col-span-2 text-right font-medium ${recebida ? 'text-green-600' : 'text-blue-500'
                            }`}
                      >
                         {recebida ? 'Recebido' : 'Em aberto'}
