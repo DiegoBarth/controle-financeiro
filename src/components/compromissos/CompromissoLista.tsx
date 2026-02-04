@@ -6,6 +6,18 @@ interface Props {
    onSelect: (compromisso: Compromisso) => void
 }
 
+function estaVencido(dataVencimento: string) {
+   const [d, m, a] = dataVencimento.split('/').map(Number)
+
+   const vencimento = new Date(a, m - 1, d)
+   vencimento.setHours(0, 0, 0, 0)
+
+   const hoje = new Date()
+   hoje.setHours(0, 0, 0, 0)
+
+   return vencimento < hoje
+}
+
 export function CompromissoLista({ compromissos, onSelect }: Props) {
    if (compromissos.length === 0) {
       return (
@@ -20,15 +32,20 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
          {/* MOBILE */}
          <div className="space-y-2 sm:hidden">
             {compromissos.map(r => {
-               const isPago = r.dataPagamento
+               const isPago = !!r.dataPagamento
                const isCartao = r.tipo === 'Cartão'
+               const isVencido = !isPago && estaVencido(r.dataVencimento)
 
                return (
                   <div
                      key={r.rowIndex}
                      onClick={() => onSelect(r)}
-                     className={`rounded-lg border p-3 cursor-pointer hover:bg-muted transition
-                        ${isPago ? 'border-green-500/40 bg-green-50' : ''}`}
+                     className={`
+                        rounded-lg border p-3 cursor-pointer transition
+                        hover:bg-muted
+                        ${isPago && 'border-green-500/40 bg-green-50'}
+                        ${isVencido && 'border-red-500/40 bg-red-50'}
+                     `}
                   >
                      <div className="flex justify-between items-start">
                         <div className="font-medium">{r.descricao}</div>
@@ -47,7 +64,6 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
                         </div>
                      )}
 
-
                      <div className="mt-1 flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">
                            {isPago
@@ -56,10 +72,18 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
                         </span>
 
                         <span
-                           className={`font-medium ${isPago ? 'text-green-600' : '!text-amber-500'
-                              }`}
+                           className={`
+                              font-medium
+                              ${isPago && 'text-green-600'}
+                              ${isVencido && 'text-red-600'}
+                              ${!isPago && !isVencido && 'text-amber-500'}
+                           `}
                         >
-                           {isPago ? 'Pago' : 'Em aberto'}
+                           {isPago
+                              ? 'Pago'
+                              : isVencido
+                                 ? 'Vencido'
+                                 : 'Em aberto'}
                         </span>
                      </div>
                   </div>
@@ -67,18 +91,23 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
             })}
          </div>
 
-         {/* DESKTOP MODERNO */}
+         {/* DESKTOP */}
          <div className="hidden sm:grid grid-cols-12 gap-3">
             {compromissos.map(r => {
-               console.log(r)
-               const isPago = r.dataPagamento
+               const isPago = !!r.dataPagamento
+               const isVencido = !isPago && estaVencido(r.dataVencimento)
 
                return (
                   <div
                      key={r.rowIndex}
                      onClick={() => onSelect(r)}
-                     className="col-span-12 grid grid-cols-12 items-center p-4
-                   rounded-lg border hover:shadow-md cursor-pointer transition"
+                     className={`
+                        col-span-12 grid grid-cols-12 items-center p-4
+                        rounded-lg border cursor-pointer transition
+                        hover:shadow-md
+                        ${isPago && 'bg-green-50 border-green-200'}
+                        ${isVencido && 'bg-red-50 border-red-200'}
+                     `}
                   >
                      <div className="col-span-4 font-medium">
                         {r.descricao}
@@ -99,16 +128,23 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
                      </div>
 
                      <div
-                        className={`col-span-1 text-sm font-medium text-right ${isPago ? 'text-green-600' : 'text-orange-500'
-                           }`}
+                        className={`
+                           col-span-1 text-sm font-medium text-right
+                           ${isPago && 'text-green-600'}
+                           ${isVencido && 'text-red-600'}
+                           ${!isPago && !isVencido && 'text-orange-500'}
+                        `}
                      >
-                        {isPago ? 'Pago' : 'Aberto'}
+                        {isPago
+                           ? 'Pago'
+                           : isVencido
+                              ? 'Vencido'
+                              : 'Aberto'}
                      </div>
                   </div>
                )
             })}
          </div>
-
       </>
    )
 }
