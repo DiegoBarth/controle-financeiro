@@ -1,121 +1,93 @@
-import { useEffect, useState } from 'react';
-import {
-   excluirCompromisso,
-   listarCompromissos,
-   atualizarCompromisso
-} from '../api/compromissos';
-import type { Compromisso } from '../types/Compromisso';
-import { numeroParaMoeda, dataBRParaISO, moedaParaNumero } from '../utils/formatadores';
-import { CompromissoGrid } from '../components/compromissos/CompromissoGrid';
-import { CompromissoForm } from '../components/compromissos/CompromissoForm';
-import { usePeriodo } from '../contexts/PeriodoContext';
-import { useNavigate } from 'react-router-dom';
-import { compromissosCache } from '../cache/compromissosCache';
+import { useEffect, useState } from 'react'
+import { listarCompromissos } from '@/api/compromissos'
+import type { Compromisso } from '@/types/Compromisso'
+import { CompromissoLista } from '@/components/compromissos/CompromissoLista'
+import { ModalNovoCompromisso } from '@/components/compromissos/ModalNovoCompromisso'
+import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCompromisso'
+import { usePeriodo } from '@/contexts/PeriodoContext'
+import { useNavigate } from 'react-router-dom'
+import { compromissosCache } from '@/cache/compromissosCache'
 
 export function Compromissos() {
-   const { mes, ano } = usePeriodo();
-   const [compromissos, setCompromissos] = useState<Compromisso[]>([]);
-   const [editandoRow, setEditandoRow] = useState<number | null>(null);
-   const [valorEditado, setValorEditado] = useState('');
-   const [dataEditada, setDataEditada] = useState('');
-   const [loading, setLoading] = useState(false);
-   const [persistindo, setPersistindo] = useState(false);
+   const { mes, ano } = usePeriodo()
+   const [compromissos, setCompromissos] = useState<Compromisso[]>([])
+   const [loading, setLoading] = useState(false)
+   const [compromissoSelecionado, setCompromissoSelecionado] =
+      useState<Compromisso | null>(null)
+   const [modalAberto, setModalAberto] = useState(false)
 
-   const navigate = useNavigate();
+   const navigate = useNavigate()
 
    async function buscar() {
-      setLoading(true);
-      const res = await listarCompromissos(mes, String(ano));
-      setCompromissos(res);
-      setLoading(false);
-   }
-
-   async function handleSalvarEdicao(scope: 'single' | 'future' = 'single') {
-      if (editandoRow === null || persistindo) return;
-
-      setPersistindo(true);
-
-      try {
-         await atualizarCompromisso({
-            rowIndex: editandoRow,
-            valor: moedaParaNumero(valorEditado),
-            dataPagamento: dataEditada,
-            scope
-         }, mes, String(ano));
-
-         setEditandoRow(null);
-         const atualizados = compromissosCache.get(mes, ano) || [];
-         setCompromissos(atualizados);
-      }
-      finally {
-         setPersistindo(false);
-      }
-   }
-
-   async function handleExcluir(rowIndex: number, scope: 'single' | 'future' | 'all' = 'single') {
-      if (!confirm('Deseja realmente excluir?')) return;
-
-      setPersistindo(true);
-
-      try {
-         await excluirCompromisso(rowIndex, mes, String(ano), scope);
-         const atualizados = compromissosCache.get(mes, ano) || [];
-         setCompromissos(atualizados);
-      }
-      finally {
-         setPersistindo(false);
-      }
-   }
-
-   function handleEditar(compromisso: Compromisso) {
-      setEditandoRow(compromisso.rowIndex);
-      setValorEditado(numeroParaMoeda(compromisso.valor));
-      setDataEditada(compromisso.dataPagamento ? dataBRParaISO(compromisso.dataPagamento) : '');
-   }
-
-   function cancelarEdicao() {
-      setEditandoRow(null);
+      setLoading(true)
+      const res = await listarCompromissos(mes, String(ano))
+      setCompromissos(res)
+      setLoading(false)
    }
 
    useEffect(() => {
-      buscar();
-   }, [mes, ano]);
+      buscar()
+   }, [mes, ano])
 
    return (
-      <div>
-         <button style={{ marginBottom: 16 }} onClick={() => navigate('/')}>
-            ← Voltar para Home
+      <div className="p-4 max-w-3xl mx-auto">
+         {/* Voltar */}
+         <button
+            className="mb-4 px-3 py-1 rounded-md border hover:bg-gray-100 transition"
+            onClick={() => navigate('/')}
+         >
+            ← Voltar
          </button>
 
-         <h2>Novo compromisso</h2>
-         <CompromissoForm
-            onSalvar={() => {
-               const atualizados = compromissosCache.get(mes, ano) || [];
+         {/* Botão Novo Compromisso */}
+         <div className="flex justify-end mb-4">
+            <button
+               onClick={() => setModalAberto(true)}
+               className="
+                  rounded-full px-5 py-2 text-white font-medium
+                  shadow-md hover:brightness-90 transition
+               "
+               style={{ backgroundColor: 'rgb(245, 158, 11)' }}
+            >
+               + Novo Compromisso
+            </button>
+         </div>
 
-               setCompromissos([...atualizados]);
-            }}
-         />
-
-         <hr />
-         <h2>Compromissos</h2>
+         {/* Lista de Compromissos */}
+         <h2 className="text-lg font-semibold mb-2">Compromissos</h2>
 
          {loading ? (
             <p>Carregando...</p>
+         ) : compromissos.length === 0 ? (
+            <p className="text-gray-500">Nenhum compromisso encontrado</p>
          ) : (
-            <CompromissoGrid
+            <CompromissoLista
                compromissos={compromissos}
-               onExcluir={handleExcluir}
-               editandoRow={editandoRow}
-               valorEditado={valorEditado}
-               dataEditada={dataEditada}
-               onEditar={handleEditar}
-               onCancelarEdicao={cancelarEdicao}
-               onSalvar={handleSalvarEdicao}
-               onChangeValor={setValorEditado}
-               onChangeData={setDataEditada}
-               persistindo={persistindo}
+               onSelect={setCompromissoSelecionado}
             />
          )}
+
+         {/* Modal Novo Compromisso */}
+         <ModalNovoCompromisso
+            aberto={modalAberto}
+            onClose={() => setModalAberto(false)}
+            onSalvar={() => {
+               const atualizados = compromissosCache.get(mes, ano) || []
+               setCompromissos([...atualizados])
+            }}
+         />
+
+         {/* Modal Editar Compromisso */}
+         <ModalEditarCompromisso
+            aberto={!!compromissoSelecionado}
+            compromisso={compromissoSelecionado}
+            onClose={() => setCompromissoSelecionado(null)}
+            onConfirmar={() => {
+               const atualizados = compromissosCache.get(mes, ano) || []
+               setCompromissos(atualizados)
+               setCompromissoSelecionado(null)
+            }}
+         />
       </div>
-   );
+   )
 }

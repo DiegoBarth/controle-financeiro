@@ -1,5 +1,5 @@
 import { useAlertas } from "@/contexts/UseAlertas"
-import type { AlertaItem } from "@/types/AlertaItem"
+import type { Compromisso } from "@/types/Compromisso"
 
 
 interface AlertaCardProps {
@@ -43,7 +43,7 @@ import { ModalEditarCompromisso } from "../compromissos/ModalEditarCompromisso"
 export function Alertas() {
    const { hoje, semana } = useAlertas()
    const [tipoAberto, setTipoAberto] = useState<"hoje" | "semana" | null>(null)
-   const [compromissoSelecionado, setCompromissoSelecionado] = useState<AlertaItem | null>(null)
+   const [compromissoSelecionado, setCompromissoSelecionado] = useState<Compromisso | null>(null)
    const [removidos, setRemovidos] = useState<number[]>([])
    const [tipoOrigem, setTipoOrigem] =
       useState<"hoje" | "semana" | null>(null)
@@ -68,18 +68,24 @@ export function Alertas() {
       }, 0)
    }
 
-   const vencimentosSemana: AlertaItem[] = semana.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+   const vencimentosSemana: Compromisso[] = semana.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
       rowIndex: c.rowIndex,
       descricao: c.descricao,
       valor: c.valor,
       data: c.dataVencimento,
+      categoria: c.categoria,
+      tipo: c.tipo,
+      dataVencimento: c.dataVencimento
    }))
 
-   const vencimentosHoje: AlertaItem[] = hoje.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+   const vencimentosHoje: Compromisso[] = hoje.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
       rowIndex: c.rowIndex,
       descricao: c.descricao,
       valor: c.valor,
       data: c.dataVencimento,
+      categoria: c.categoria,
+      tipo: c.tipo,
+      dataVencimento: c.dataVencimento
    }))
 
    if (!vencimentosSemana.length && !vencimentosHoje.length) return null
@@ -125,7 +131,7 @@ export function Alertas() {
             itens={vencimentosSemana}
             onClose={() => setTipoAberto(null)}
             onSelect={item => {
-               setTipoOrigem(tipoAberto) 
+               setTipoOrigem(tipoAberto)
                setTipoAberto(null)
                setCompromissoSelecionado(item)
             }}
