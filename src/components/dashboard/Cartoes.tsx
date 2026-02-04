@@ -4,17 +4,16 @@ import { numeroParaMoeda } from '../../utils/formatadores'
 
 interface Props {
    cartoes: Cartao[]
-   loading: boolean
 }
 
-export function Cartoes({ cartoes, loading }: Props) {
+export function Cartoes({ cartoes }: Props) {
    const [ativo, setAtivo] = useState(0)
    const [startX, setStartX] = useState<number | null>(null)
    const [isDragging, setIsDragging] = useState(false)
 
    const minSwipeDistance = 50
 
-   if (loading || !cartoes.length) return null
+   if (!cartoes.length) return null
 
    function estilo(index: number) {
       const pos = index - ativo

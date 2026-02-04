@@ -3,11 +3,10 @@ import { numeroParaMoeda } from '../../utils/formatadores'
 
 interface Props {
    resumo: ResumoCompleto | null
-   loading: boolean
 }
 
-export function ProgressoReceitasDespesas({ resumo, loading }: Props) {
-   if (loading || !resumo) return null
+export function ProgressoReceitasDespesas({ resumo }: Props) {
+   if (!resumo) return null
 
    const percRecebido = resumo.totalReceitas
       ? (resumo.totalRecebidoMes / resumo.totalReceitas) * 100
