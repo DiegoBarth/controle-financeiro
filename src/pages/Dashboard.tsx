@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
-import { useDashboard } from '../contexts/DashboardContext'
 
+import { Cartoes } from '../components/dashboard/Cartoes'
+import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
+import { ProgressoReceitasDespesas } from '../components/dashboard/ProgressoReceitasDespesas'
 import { SaldoAno } from '../components/dashboard/SaldoAno'
 import { TopCategorias } from '../components/dashboard/TopCategorias'
-import { Cartoes } from '../components/dashboard/Cartoes'
-import { ProgressoReceitasDespesas } from '../components/dashboard/ProgressoReceitasDespesas'
-import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
+import { useDashboard } from '../contexts/DashboardContext'
 
 export function Dashboard() {
    const {

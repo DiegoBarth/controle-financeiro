@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { listarCompromissos } from '@/api/compromissos'
-import type { Compromisso } from '@/types/Compromisso'
-import { CompromissoLista } from '@/components/compromissos/CompromissoLista'
-import { ModalNovoCompromisso } from '@/components/compromissos/ModalNovoCompromisso'
-import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCompromisso'
-import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useNavigate } from 'react-router-dom'
+import { listarCompromissos } from '@/api/endpoints/compromissos'
 import { compromissosCache } from '@/cache/compromissosCache'
+import { CompromissoLista } from '@/components/compromissos/CompromissoLista'
+import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCompromisso'
+import { ModalNovoCompromisso } from '@/components/compromissos/ModalNovoCompromisso'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
+import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Compromisso } from '@/types/Compromisso'
 
 export function Compromissos() {
    const { mes, ano } = usePeriodo()

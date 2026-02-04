@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { atualizarCompromisso, excluirCompromisso } from '@/api/compromissos'
+import { atualizarCompromisso, excluirCompromisso } from '@/api/endpoints/compromissos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Compromisso } from '@/types/Compromisso'
 import { formatarMoeda, moedaParaNumero, numeroParaMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import type { Compromisso } from '@/types/Compromisso'
 
 interface Props {
    aberto: boolean

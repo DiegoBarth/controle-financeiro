@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { criarReceita } from '@/api/receitas'
+import { useState , useEffect } from 'react'
+import { criarReceita } from '@/api/endpoints/receitas'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import { useEffect } from 'react'
+
 
 interface Props {
    aberto: boolean

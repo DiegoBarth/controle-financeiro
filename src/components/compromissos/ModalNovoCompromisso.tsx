@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { criarCompromisso, criarCartao } from '@/api/compromissos'
+import { criarCompromisso, criarCartao } from '@/api/endpoints/compromissos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'

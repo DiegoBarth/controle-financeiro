@@ -1,7 +1,7 @@
-import { apiGet, apiPost } from './client';
-import type { Compromisso } from '../types/Compromisso';
-import { compromissosCache } from '../cache/compromissosCache';
-import { formatarDataBR } from '../utils/formatadores';
+import { apiGet, apiPost } from '@/api/client';
+import { compromissosCache } from '@/cache/compromissosCache';
+import type { Compromisso } from '@/types/Compromisso';
+import { formatarDataBR } from '@/utils/formatadores';
 
 export async function listarCompromissos(mes: string, ano: string) {
    const cached = compromissosCache.get(mes, ano);

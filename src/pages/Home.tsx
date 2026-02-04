@@ -1,10 +1,10 @@
-import { FiltrosPeriodo } from "../components/home/FiltrosPeriodo"
-import { Alertas } from "../components/home/Alertas"
-import { ResumoMes } from "../components/home/ResumoMes"
-import { AcoesRapidas } from "../components/home/AcoesRapidas"
 import { useEffect } from 'react';
-import { usePeriodo } from '../contexts/PeriodoContext';
 import { listarDados } from '../api/home';
+import { AcoesRapidas } from "../components/home/AcoesRapidas"
+import { Alertas } from "../components/home/Alertas"
+import { FiltrosPeriodo } from "../components/home/FiltrosPeriodo"
+import { ResumoMes } from "../components/home/ResumoMes"
+import { usePeriodo } from '../contexts/PeriodoContext';
 
 interface Props {
    onLogout: () => void

@@ -1,6 +1,6 @@
-import { apiGet, apiPost } from './client';
-import type { Gasto } from '../types/Gasto';
-import { gastosCache } from '../cache/gastosCache';
+import { apiGet, apiPost } from '@/api/client';
+import { gastosCache } from '@/cache/gastosCache';
+import type { Gasto } from '@/types/Gasto';
 
 export async function criarGasto(payload: {
    data: string;

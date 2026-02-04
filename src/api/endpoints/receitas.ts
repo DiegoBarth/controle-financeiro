@@ -1,7 +1,7 @@
-import { apiGet, apiPost } from './client';
-import type { Receita } from '../types/Receita';
-import { receitasCache } from '../cache/receitasCache';
-import { formatarDataBR } from '../utils/formatadores';
+import { apiGet, apiPost } from '@/api/client';
+import { receitasCache } from '@/cache/receitasCache';
+import type { Receita } from '@/types/Receita';
+import { formatarDataBR } from '@/utils/formatadores';
 
 export async function criarReceita(payload: {
    dataPrevista: string;

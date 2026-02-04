@@ -3,14 +3,14 @@ import {
    listarSaldoMensal,
    listarTopCategorias,
    listarCartoesResumo
-} from '../api/dashboard';
-import { usePeriodo } from './PeriodoContext';
+} from '@/api/endpoints/dashboard';
 import type {
    SaldoMensal,
    Categoria,
    Cartao
 } from '../types/Dashboard';
 import type { ResumoCompleto } from '../types/ResumoCompleto';
+import { usePeriodo } from './PeriodoContext';
 
 interface DashboardContextType {
    saldoAno: SaldoMensal[];

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { criarReceita } from '../../api/receitas';
-import { moedaParaNumero, formatarMoeda } from '../../utils/formatadores';
+import { criarReceita } from '@/api/endpoints/receitas';
+import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores';
 
 interface Props {
    onSalvar: () => void;
