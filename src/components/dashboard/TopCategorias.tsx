@@ -1,33 +1,43 @@
-// components/dashboard/TopCategorias.tsx
-import type { Categoria } from '../../types/Dashboard';
+import type { Categoria } from '../../types/Dashboard'
+import { numeroParaMoeda } from '../../utils/formatadores'
 
 interface TopCategoriasProps {
-   categorias: Categoria[];
-   loading: boolean;
+   categorias: Categoria[]
+   loading: boolean
 }
 
 export function TopCategorias({ categorias, loading }: TopCategoriasProps) {
-   if (loading) return <p>Carregando categorias...</p>;
+   if (loading) return <p className="text-sm text-muted-foreground">Carregando categorias...</p>
+
+   if (!categorias.length) return null
+
+   const maior = categorias[0].total
 
    return (
-      <div>
-         <h2>Top 10 categorias</h2>
-         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <section className="rounded-xl border bg-card p-4">
+         <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+            Top categorias
+         </h2>
+
+         <ul className="space-y-3">
             {categorias.map(c => (
-               <div key={c.categoria} style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ width: 120 }}>{c.categoria}</span>
-                  <div style={{ flex: 1, height: 16, background: '#eee', borderRadius: 8, margin: '0 8px' }}>
-                     <div style={{
-                        width: `${Math.min(100, (c.total / categorias[0].total) * 100)}%`,
-                        height: '100%',
-                        background: '#e74c3c',
-                        borderRadius: 8
-                     }} />
+               <li key={c.categoria}>
+                  <div className="mb-1 flex justify-between text-sm">
+                     <span>{c.categoria}</span>
+                     <span className="text-muted-foreground">
+                        {numeroParaMoeda(c.total)}
+                     </span>
                   </div>
-                  <span>R$ {c.total.toFixed(2)}</span>
-               </div>
+
+                  <div className="h-2 w-full rounded-full bg-muted">
+                     <div
+                        className="h-2 rounded-full bg-red-500"
+                        style={{ width: `${(c.total / maior) * 100}%` }}
+                     />
+                  </div>
+               </li>
             ))}
-         </div>
-      </div>
-   );
+         </ul>
+      </section>
+   )
 }

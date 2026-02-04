@@ -7,6 +7,7 @@ import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCom
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useNavigate } from 'react-router-dom'
 import { compromissosCache } from '@/cache/compromissosCache'
+import { SkeletonLista } from '@/components/ui/SkeletonLista'
 
 export function Compromissos() {
    const { mes, ano } = usePeriodo()
@@ -28,6 +29,14 @@ export function Compromissos() {
    useEffect(() => {
       buscar()
    }, [mes, ano])
+
+   if (loading) {
+      return (
+         <div className="mx-auto max-w-5xl p-4">
+            <SkeletonLista />
+         </div>
+      )
+   }
 
    return (
       <div className="p-4 max-w-3xl mx-auto">
