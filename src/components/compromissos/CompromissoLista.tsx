@@ -40,9 +40,13 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
 
                      {isCartao && (
                         <div className="mt-1 text-xs text-muted-foreground">
-                           {r.cartao} • Parcela {r.parcela}/{r.totalParcelas}
+                           {r.cartao}
+                           {(r.totalParcelas ?? 1) > 1 && (
+                              <> • Parcela {r.parcela}/{r.totalParcelas}</>
+                           )}
                         </div>
                      )}
+
 
                      <div className="mt-1 flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">
