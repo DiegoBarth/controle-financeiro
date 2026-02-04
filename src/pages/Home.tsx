@@ -6,7 +6,11 @@ import { useEffect } from 'react';
 import { usePeriodo } from '../contexts/PeriodoContext';
 import { listarDados } from '../api/home';
 
-export function Home() {
+interface Props {
+   onLogout: () => void
+}
+
+export function Home({ onLogout }: Props) {
    const { mes, setMes, ano, setAno } = usePeriodo();
 
    useEffect(() => {
@@ -19,15 +23,22 @@ export function Home() {
    return (
       <div className="min-h-screen bg-background">
          <div className="mx-auto max-w-lg px-4 py-6 md:max-w-2xl lg:max-w-4xl">
-            
+
             <header className="mb-4">
                <h1 className="mb-4 text-2xl font-bold text-foreground">Home</h1>
+
                <FiltrosPeriodo
                   mes={mes}
                   ano={ano}
                   onMesChange={setMes}
                   onAnoChange={setAno}
                />
+
+               <button
+                  onClick={onLogout}
+                  className=" fixed top-7 right-4 text-sm text-gray-600 hover:text-red-800 border px-2 py-1 rounded-md transition-colors">
+                  Logout
+               </button>
             </header>
 
             <section className="mb-4">
