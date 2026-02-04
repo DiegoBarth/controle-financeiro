@@ -41,15 +41,19 @@ import { ModalCompromissos } from "./ModalCompromissos"
 import { ModalEditarCompromisso } from "../compromissos/ModalEditarCompromisso"
 
 export function Alertas() {
-   const { hoje, semana } = useAlertas()
-   const [tipoAberto, setTipoAberto] = useState<"hoje" | "semana" | null>(null)
+   const { vencidos, hoje, semana } = useAlertas()
+   const [tipoAberto, setTipoAberto] = useState<"vencido" | "hoje" | "semana" | null>(null)
    const [compromissoSelecionado, setCompromissoSelecionado] = useState<Compromisso | null>(null)
    const [removidos, setRemovidos] = useState<number[]>([])
    const [tipoOrigem, setTipoOrigem] =
-      useState<"hoje" | "semana" | null>(null)
+      useState<"vencido" | "hoje" | "semana" | null>(null)
 
 
    function voltarParaLista() {
+      if (tipoOrigem === "vencido" && jaVencidos.length > 0) {
+         setTipoAberto("vencido")
+      }
+
       if (tipoOrigem === "hoje" && vencimentosHoje.length > 0) {
          setTipoAberto("hoje")
       }
@@ -68,7 +72,11 @@ export function Alertas() {
       }, 0)
    }
 
-   const vencimentosSemana: Compromisso[] = semana.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+   function pluralizar(qtd: number, singular: string, plural: string) {
+      return qtd === 1 ? singular : plural
+   }
+
+   const jaVencidos: Compromisso[] = vencidos.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
       rowIndex: c.rowIndex,
       descricao: c.descricao,
       valor: c.valor,
@@ -88,28 +96,60 @@ export function Alertas() {
       dataVencimento: c.dataVencimento
    }))
 
-   if (!vencimentosSemana.length && !vencimentosHoje.length) return null
+   const vencimentosSemana: Compromisso[] = semana.filter(c => !removidos.includes(c.rowIndex)).map(c => ({
+      rowIndex: c.rowIndex,
+      descricao: c.descricao,
+      valor: c.valor,
+      data: c.dataVencimento,
+      categoria: c.categoria,
+      tipo: c.tipo,
+      dataVencimento: c.dataVencimento
+   }))
+
+   if (!jaVencidos.length && !vencimentosSemana.length && !vencimentosHoje.length) return null
 
    return (
       <>
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+         <div className=" grid gap-3 grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(260px,1fr))] justify-center">
+            {jaVencidos.length > 0 && (
+               <AlertaCard
+                  titulo={`${jaVencidos.length} ${pluralizar(
+                     jaVencidos.length,
+                     'conta vencida',
+                     'contas vencidas'
+                  )}`}
+                  gradientFrom="#dc2626"
+                  gradientTo="#f87171"
+                  onClick={() => setTipoAberto("vencido")}
+               />
+            )}
+
             {vencimentosHoje.length > 0 && (
                <AlertaCard
-                  titulo={`${vencimentosHoje.length} conta(s) vencendo hoje`}
-                  gradientFrom="#db2777"
-                  gradientTo="#f472b6"
+                  titulo={`${vencimentosHoje.length} ${pluralizar(
+                     vencimentosHoje.length,
+                     'conta vencendo hoje',
+                     'contas vencendo hoje'
+                  )}`}
+                  gradientFrom="#f59e0b"
+                  gradientTo="#fbbf24"
                   onClick={() => setTipoAberto("hoje")}
                />
             )}
 
             {vencimentosSemana.length > 0 && (
                <AlertaCard
-                  titulo={`${vencimentosSemana.length} conta(s) vencendo essa semana`}
-                  gradientFrom="#7c3aed"
-                  gradientTo="#a855f7"
+                  titulo={`${vencimentosSemana.length} ${pluralizar(
+                     vencimentosSemana.length,
+                     'conta vencendo essa semana',
+                     'contas vencendo essa semana'
+                  )}`}
+                  gradientFrom="#2563eb"
+                  gradientTo="#60a5fa"
                   onClick={() => setTipoAberto("semana")}
                />
             )}
+
          </div>
 
          {/* MODAIS */}

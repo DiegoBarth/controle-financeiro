@@ -12,15 +12,33 @@ export function useAlertas() {
 
    useEffect(() => {
       const oldAdd = compromissosCache.add;
+      const oldUpdate = compromissosCache.update;
+      const oldRemove = compromissosCache.remove;
+
+      const bump = () => setTick(t => t + 1);
+
       compromissosCache.add = (...args) => {
          oldAdd(...args);
-         setTick(t => t + 1);
+         bump();
+      };
+
+      compromissosCache.update = (...args) => {
+         oldUpdate(...args);
+         bump();
+      };
+
+      compromissosCache.remove = (...args) => {
+         oldRemove(...args);
+         bump();
       };
 
       return () => {
          compromissosCache.add = oldAdd;
+         compromissosCache.update = oldUpdate;
+         compromissosCache.remove = oldRemove;
       };
    }, []);
+
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());
@@ -28,6 +46,17 @@ export function useAlertas() {
       const compromissos = compromissosCache
          .getAll()
          .filter(c => !c.dataPagamento);
+
+      const vencidos = compromissos.filter(c => {
+         const [d, m, a] = c.dataVencimento.split('/').map(Number);
+         const data = zerarHora(new Date(a, m - 1, d));
+
+         const diffDias = Math.ceil(
+            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
+         );
+
+         return diffDias < 0;
+      });
 
       const vencendoHoje = compromissos.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
@@ -38,13 +67,16 @@ export function useAlertas() {
       const vencendoSemana = compromissos.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
          const data = zerarHora(new Date(a, m - 1, d));
-         const diffDias =
-            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24);
+
+         const diffDias = Math.ceil(
+            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
+         );
 
          return diffDias > 0 && diffDias <= 7;
       });
 
       return {
+         vencidos,
          hoje: vencendoHoje,
          semana: vencendoSemana
       };
