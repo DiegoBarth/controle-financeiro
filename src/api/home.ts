@@ -13,6 +13,13 @@ export interface Teste {
    gastos: Gasto[];
 }
 
+export function verificarEmailPossuiAutorizacao(email: string) {
+   return apiGet({
+      acao: 'verificarEmailPossuiAutorizacao',
+      email
+   });
+}
+
 export function listarResumoCompleto(mes: string, ano: string) {
    return apiGet<ResumoCompleto>({
       acao: 'listarResumoCompleto',
@@ -20,6 +27,7 @@ export function listarResumoCompleto(mes: string, ano: string) {
       ano
    });
 }
+
 export async function listarDados(mes: string, ano: string) {
    const receitas =
       mes === 'all'
