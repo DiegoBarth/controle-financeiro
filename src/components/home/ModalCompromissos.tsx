@@ -1,5 +1,5 @@
-import type { Compromisso } from "@/types/Compromisso"
 import { useState, useEffect } from "react"
+import type { Compromisso } from "@/types/Compromisso"
 
 interface ModalCompromissosProps {
    aberto: boolean

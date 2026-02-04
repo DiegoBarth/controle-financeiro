@@ -1,5 +1,5 @@
-import { apiGet } from './client';
-import type { Categoria, SaldoMensal, Cartao } from '../types/Dashboard';
+import { apiGet } from '@/api/client';
+import type { Categoria, SaldoMensal, Cartao } from '@/types/Dashboard';
 
 export function listarSaldoMensal(ano: string) {
    return apiGet<SaldoMensal[]>({

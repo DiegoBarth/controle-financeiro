@@ -1,16 +1,19 @@
+import { GoogleLogin, googleLogout } from "@react-oauth/google";
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { GoogleLogin, googleLogout } from "@react-oauth/google";
-import { Home } from "./pages/Home";
-import { Gastos } from "./pages/Gastos";
-import { Compromissos } from "./pages/Compromissos";
-import { Receitas } from "./pages/Receitas";
-import { Dashboard } from "./pages/Dashboard";
+import { useToast } from '@/contexts/toast';
 import { verificarEmailPossuiAutorizacao } from "./api/home";
+import { Compromissos } from "./pages/Compromissos";
+import { Dashboard } from "./pages/Dashboard";
+import { Gastos } from "./pages/Gastos";
+import { Home } from "./pages/Home";
+import { Receitas } from "./pages/Receitas";
 
 const AUTH_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 dias
 
 function App() {
+   const toast = useToast();
+
    const [userEmail, setUserEmail] = useState<string | null>(() => {
       const saved = localStorage.getItem("user_email");
       const savedTime = Number(localStorage.getItem("login_time") || 0);
@@ -26,7 +29,7 @@ function App() {
       return saved;
    });
 
-   const handleLoginSuccess = async (credentialResponse: any) => {
+   async function handleLoginSuccess(credentialResponse: any) {
       try {
          const decoded = JSON.parse(
             atob(credentialResponse.credential.split(".")[1])
@@ -35,7 +38,7 @@ function App() {
 
          const autorizado = await verificarEmailPossuiAutorizacao(email);
          if (!autorizado) {
-            alert("E-mail não autorizado!");
+            toast.error('E-mail não autorizado!');
             return;
          }
 
@@ -44,14 +47,16 @@ function App() {
          setUserEmail(email);
       } catch (err) {
          console.error("Erro ao decodificar login:", err);
+         toast.error('Erro ao fazer login');
       }
-   };
+   }
 
    const handleLogout = () => {
       googleLogout();
       localStorage.removeItem("user_email");
       localStorage.removeItem("login_time");
       setUserEmail(null);
+      toast.info('Você foi desconectado');
    };
 
    useEffect(() => {
@@ -77,7 +82,7 @@ function App() {
 
                <GoogleLogin
                   onSuccess={handleLoginSuccess}
-                  onError={() => alert("Erro no login")}
+                  onError={() => toast.error('Erro no login Google')}
                   useOneTap
                />
 

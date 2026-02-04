@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { atualizarReceita, excluirReceita } from '@/api/receitas'
+import { atualizarReceita, excluirReceita } from '@/api/endpoints/receitas'
 import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Receita } from '@/types/Receita'
 import { numeroParaMoeda, moedaParaNumero, dataBRParaISO, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import type { Receita } from '@/types/Receita'
 
 interface Props {
    aberto: boolean

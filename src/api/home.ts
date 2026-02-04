@@ -1,11 +1,11 @@
-import { apiGet } from './client';
-import type { ResumoCompleto } from '../types/ResumoCompleto';
-import type { Compromisso } from '../types/Compromisso';
-import type { Receita } from '../types/Receita';
-import type { Gasto } from '../types/Gasto';
 import { compromissosCache } from '../cache/compromissosCache';
-import { receitasCache } from '../cache/receitasCache';
 import { gastosCache } from '../cache/gastosCache';
+import { receitasCache } from '../cache/receitasCache';
+import type { Compromisso } from '../types/Compromisso';
+import type { Gasto } from '../types/Gasto';
+import type { Receita } from '../types/Receita';
+import type { ResumoCompleto } from '../types/ResumoCompleto';
+import { apiGet } from './client';
 
 export interface Teste {
    compromissos: Compromisso[];

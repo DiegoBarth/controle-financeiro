@@ -1,8 +1,8 @@
+import { Minus, Plus, Calendar, BarChart3 } from "lucide-react"
 import React from "react"
 
-import { Minus, Plus, Calendar, BarChart3 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button"
 
 interface AcaoRapida {
    id: string

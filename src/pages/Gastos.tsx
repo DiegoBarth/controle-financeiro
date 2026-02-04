@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { listarGastos } from '../api/gastos'
-import type { Gasto } from '../types/Gasto'
-import { GastoLista } from '@/components/gastos/GastoLista'
-import { ModalEditarGasto } from '../components/gastos/ModalEditarGasto'
-import { ModalNovoGasto } from '@/components/gastos/ModalNovoGasto'
-import { usePeriodo } from '../contexts/PeriodoContext'
 import { useNavigate } from 'react-router-dom'
+import { listarGastos } from '@/api/endpoints/gastos'
 import { gastosCache } from '@/cache/gastosCache'
+import { GastoLista } from '@/components/gastos/GastoLista'
+import { ModalNovoGasto } from '@/components/gastos/ModalNovoGasto'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
+import { ModalEditarGasto } from '../components/gastos/ModalEditarGasto'
+import { usePeriodo } from '../contexts/PeriodoContext'
+import type { Gasto } from '../types/Gasto'
 
 export function Gastos() {
    const { mes, ano } = usePeriodo()

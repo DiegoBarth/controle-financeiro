@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { listarReceitas } from '../api/receitas'
-import type { Receita } from '../types/Receita'
-import { ReceitaLista } from '@/components/receita/ReceitaLista'
-import { ModalEditarReceita } from '../components/receita/ModalEditarReceita'
-import { ModalNovaReceita } from '@/components/receita/ModalNovaReceita'
-import { usePeriodo } from '../contexts/PeriodoContext'
 import { useNavigate } from 'react-router-dom'
-import { receitasCache } from '../cache/receitasCache'
+import { listarReceitas } from '@/api/endpoints/receitas'
+import { ModalNovaReceita } from '@/components/receita/ModalNovaReceita'
+import { ReceitaLista } from '@/components/receita/ReceitaLista'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
+import { receitasCache } from '../cache/receitasCache'
+import { ModalEditarReceita } from '../components/receita/ModalEditarReceita'
+import { usePeriodo } from '../contexts/PeriodoContext'
+import type { Receita } from '../types/Receita'
 
 export function Receitas() {
    const { mes, ano } = usePeriodo()

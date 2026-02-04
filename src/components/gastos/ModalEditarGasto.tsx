@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { atualizarGasto, excluirGasto } from '@/api/gastos'
+import { atualizarGasto, excluirGasto } from '@/api/endpoints/gastos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Gasto } from '@/types/Gasto'
 import { numeroParaMoeda, moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import type { Gasto } from '@/types/Gasto'
 
 interface Props {
    aberto: boolean

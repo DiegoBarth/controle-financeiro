@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { criarGasto } from '@/api/gastos'
+import { useState , useEffect } from 'react'
+import { criarGasto } from '@/api/endpoints/gastos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
-import { useEffect } from 'react'
+
 
 interface Props {
    aberto: boolean
