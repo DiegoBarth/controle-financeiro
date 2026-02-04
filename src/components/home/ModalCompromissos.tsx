@@ -1,12 +1,12 @@
-import type { AlertaItem } from "@/types/AlertaItem"
+import type { Compromisso } from "@/types/Compromisso"
 import { useState, useEffect } from "react"
 
 interface ModalCompromissosProps {
    aberto: boolean
    onClose: () => void
    titulo: string
-   itens: AlertaItem[]
-   onSelect: (item: AlertaItem) => void
+   itens: Compromisso[]
+   onSelect: (item: Compromisso) => void
 }
 
 export function ModalCompromissos({
@@ -16,7 +16,7 @@ export function ModalCompromissos({
    itens,
    onSelect,
 }: ModalCompromissosProps) {
-   const [lista, setLista] = useState<AlertaItem[]>([])
+   const [lista, setLista] = useState<Compromisso[]>([])
 
    useEffect(() => {
       if (aberto) {
@@ -52,7 +52,7 @@ export function ModalCompromissos({
             </div>
 
             {/* Conteúdo scrollável */}
-            <ul className="overflow-y-auto p-4 space-y-2 flex-1">
+            <ul className=" p-4 space-y-2 overflow-y-auto max-h-[320px] md:max-h-none md:flex-1">
                {lista.length > 0 ? (
                   lista.map(item => (
                      <li
@@ -65,7 +65,7 @@ export function ModalCompromissos({
                      >
                         <div className="font-medium">{item.descricao}</div>
                         <div className="text-xs text-muted-foreground">
-                           Vence em {item.data}
+                           Vence em {item.dataVencimento}
                         </div>
                      </li>
                   ))

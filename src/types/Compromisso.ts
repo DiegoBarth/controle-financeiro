@@ -4,16 +4,13 @@ export interface Compromisso {
    descricao: string;
    categoria: string;
 
-   tipo: 'fixo' | 'variavel' | 'cartao';
+   tipo: 'Fixo' | 'Variável' | 'Cartão';
 
    valor: number;
 
-   dataVencimento: string;   // dd/MM/yyyy
-   dataPagamento?: string;   // dd/MM/yyyy | vazio
+   dataVencimento: string;
+   dataPagamento?: string;
 
-   pago: boolean;
-
-   // só para cartão
    cartao?: string;
    parcela?: number;
    totalParcelas?: number;

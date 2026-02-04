@@ -22,83 +22,84 @@ export function ReceitaLista({ receitas, onSelect }: Props) {
             {receitas.map(r => {
                const recebida = !!r.dataRecebimento
 
+               const textoData = recebida
+                  ? `Recebido em ${r.dataRecebimento}`
+                  : `Previsto para ${r.dataPrevista}`
+
                return (
                   <div
                      key={r.rowIndex}
-                     className={`
-                rounded-lg border p-3 cursor-pointer
-                hover:bg-muted transition
-                ${recebida ? 'border-green-500/40 bg-green-50' : ''}
-              `}
                      onClick={() => onSelect(r)}
+                     className={`
+          rounded-lg border p-3 cursor-pointer transition
+          hover:bg-muted
+          ${recebida ? 'border-green-500/40 bg-green-50' : ''}
+        `}
                   >
-                     <div className="flex items-center justify-between">
-                        <div className="font-medium flex items-center gap-2">
-                           {recebida ? '✔️' : '⏳'} {r.descricao}
-                        </div>
-
-                        <span className="text-sm font-semibold">
+                     <div className="flex justify-between items-start">
+                        <div className="font-medium">{r.descricao}</div>
+                        <div className="font-semibold">
                            {numeroParaMoeda(r.valor)}
-                        </span>
+                        </div>
                      </div>
 
-                     <div className="mt-1 text-xs text-muted-foreground">
-                        Data prevista: {r.dataPrevista}
+                     <div className="mt-1 flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{textoData}</span>
+                        <span
+                           className={`font-medium ${recebida ? 'text-green-600' : 'text-blue-500'
+                              }`}
+                        >
+                           {recebida ? 'Recebido' : 'Em aberto'}
+                        </span>
+                     </div>
+                  </div>
+               )
+            })}
+         </div>
+
+
+         {/* DESKTOP MODERNO */}
+         <div className="hidden sm:grid grid-cols-12 gap-3">
+            {receitas.map(r => {
+               const recebida = !!r.dataRecebimento
+
+               const textoData = recebida
+                  ? `Recebido em ${r.dataRecebimento}`
+                  : `Previsto para ${r.dataPrevista}`
+
+               return (
+                  <div
+                     key={r.rowIndex}
+                     onClick={() => onSelect(r)}
+                     className={`
+          col-span-12 grid grid-cols-12 items-center p-4
+          rounded-lg border cursor-pointer transition
+          hover:shadow-md
+        `}
+                  >
+                     <div className="col-span-4 font-medium">
+                        {r.descricao}
+                     </div>
+
+                     <div className="col-span-4 text-sm text-muted-foreground">
+                        {textoData}
+                     </div>
+
+                     <div className="col-span-2 text-right font-semibold">
+                        {numeroParaMoeda(r.valor)}
                      </div>
 
                      <div
-                        className={`
-                  text-xs mt-0.5
-                  ${recebida ? 'text-green-600' : 'text-muted-foreground'}
-                `}
+                        className={`col-span-2 text-right font-medium ${recebida ? 'text-green-600' : 'text-amber-500'
+                           }`}
                      >
-                        {recebida
-                           ? `Recebido em: ${r.dataRecebimento}`
-                           : 'Não recebido'}
+                        {recebida ? 'Recebido' : 'Em aberto'}
                      </div>
                   </div>
                )
             })}
          </div>
 
-         {/* DESKTOP MODERNO */}
-         <div className="hidden sm:grid sm:grid-cols-12 gap-3">
-            {receitas.map(r => {
-               const recebida = !!r.dataRecebimento
-               const textoRecebido = r.dataRecebimento ? 'Recebido em: ' + r.dataRecebimento : '-';
-
-               return (
-                  <div
-                     key={r.rowIndex}
-                     className={`
-                col-span-12 flex items-center justify-between p-4
-                rounded-lg border shadow-sm cursor-pointer transition
-                hover:shadow-md
-                ${recebida ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}
-              `}
-                     onClick={() => onSelect(r)}
-                  >
-                     <div className="flex items-center w-16 justify-center text-lg">
-                        {recebida ? '✔️' : '⏳'}
-                     </div>
-
-                     <div className="flex-1 font-medium">{r.descricao}</div>
-
-                     <div className="w-32 text-sm text-muted-foreground text-center">
-                        Data prevista: {r.dataPrevista}
-                     </div>
-
-                     <div className={`w-32 text-sm text-center ${recebida ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        {textoRecebido}
-                     </div>
-
-                     <div className="w-32 text-right font-semibold">
-                        {numeroParaMoeda(r.valor)}
-                     </div>
-                  </div>
-               )
-            })}
-         </div>
       </>
    )
 }

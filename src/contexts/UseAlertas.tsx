@@ -27,7 +27,7 @@ export function useAlertas() {
 
       const compromissos = compromissosCache
          .getAll()
-         .filter(c => !c.dataPagamento && !c.pago);
+         .filter(c => !c.dataPagamento);
 
       const vencendoHoje = compromissos.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);

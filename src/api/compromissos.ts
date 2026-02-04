@@ -20,7 +20,7 @@ export async function listarCompromissos(mes: string, ano: string) {
 export async function criarCompromisso(payload: {
    descricao: string;
    categoria: string;
-   tipo: 'fixo' | 'variavel';
+   tipo: 'Fixo' | 'Variável';
    valor: number;
    dataVencimento: string;
    meses?: number;

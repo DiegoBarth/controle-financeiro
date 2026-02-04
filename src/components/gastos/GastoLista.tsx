@@ -10,7 +10,7 @@ export function GastoLista({ gastos, onSelect }: Props) {
    if (gastos.length === 0) {
       return (
          <p className="text-sm text-muted-foreground">
-            Nenhuma gasto cadastrado
+            Nenhum gasto cadastrado
          </p>
       )
    }
@@ -19,65 +19,77 @@ export function GastoLista({ gastos, onSelect }: Props) {
       <>
          {/* MOBILE */}
          <div className="space-y-2 sm:hidden">
-            {gastos.map(r => {
-               return (
-                  <div
-                     key={r.rowIndex}
-                     className={`
-                rounded-lg border p-3 cursor-pointer
-                hover:bg-muted transition
-              `}
-                     onClick={() => onSelect(r)}
-                  >
-                     <div className="flex items-center justify-between">
-                        <div className="font-medium flex items-center gap-2">
-                           {r.descricao}
-                        </div>
-
-                        <span className="text-sm font-semibold">
-                           {numeroParaMoeda(r.valor)}
-                        </span>
+            {gastos.map(r => (
+               <div
+                  key={r.rowIndex}
+                  onClick={() => onSelect(r)}
+                  className="
+        rounded-lg border p-3 cursor-pointer
+        hover:bg-muted transition
+      "
+               >
+                  <div className="flex justify-between items-start">
+                     <div className="font-medium">
+                        {r.descricao}
                      </div>
 
-                     <div className="mt-1 text-xs text-muted-foreground">
-                        Pago em: {r.dataPagamento}
-                     </div>
-
-                     <div
-                        className={`text-xs mt-0.5 text-muted-foreground`}
-                     >
-                     </div>
-                  </div>
-               )
-            })}
-         </div>
-
-         {/* DESKTOP MODERNO */}
-         <div className="hidden sm:grid sm:grid-cols-12 gap-3">
-            {gastos.map(r => {
-               return (
-                  <div
-                     key={r.rowIndex}
-                     className={`
-                col-span-12 flex items-center justify-between p-4
-                rounded-lg border shadow-sm cursor-pointer transition
-                hover:shadow-md
-              `}
-                     onClick={() => onSelect(r)}
-                  >
-                     <div className="flex-1 font-medium">{r.descricao}</div>
-
-                     <div className="w-32 text-sm text-muted-foreground text-center">
-                        Pago em: {r.dataPagamento}
-                     </div>
-
-                     <div className="w-32 text-right font-semibold">
+                     <div className="font-semibold text-red-600">
                         {numeroParaMoeda(r.valor)}
                      </div>
                   </div>
-               )
-            })}
+
+                  <div className="mt-1 flex items-center justify-between text-xs">
+                     <span className="text-muted-foreground">
+                        Pago em {r.dataPagamento} • {r.categoria}
+                     </span>
+
+                     <span className="font-medium text-green-600">
+                        Pago
+                     </span>
+                  </div>
+               </div>
+            ))}
          </div>
+
+         {/* DESKTOP MODERNO */}
+         <div className="hidden sm:grid grid-cols-12 gap-3">
+            {gastos.map(r => (
+               <div
+                  key={r.rowIndex}
+                  onClick={() => onSelect(r)}
+                  className="
+        col-span-12 grid grid-cols-12 items-center p-4
+        rounded-lg border hover:shadow-md cursor-pointer transition
+      "
+               >
+                  {/* Descrição */}
+                  <div className="col-span-4 font-medium">
+                     {r.descricao}
+                  </div>
+
+                  {/* Categoria (ou placeholder) */}
+                  <div className="col-span-2 text-sm text-muted-foreground capitalize">
+                     {r.categoria ?? '-'}
+                  </div>
+
+                  {/* Data */}
+                  <div className="col-span-3 text-sm text-muted-foreground">
+                     Pago em {r.dataPagamento}
+                  </div>
+
+                  {/* Valor */}
+                  <div className="col-span-2 text-right font-semibold text-red-600">
+                     {numeroParaMoeda(r.valor)}
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-1 text-sm font-medium text-right text-green-600">
+                     Pago
+                  </div>
+               </div>
+            ))}
+         </div>
+
       </>
    )
 }
