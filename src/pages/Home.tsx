@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function Home({ onLogout }: Props) {
-   const { mes, setMes, ano, setAno } = usePeriodo();
+   const { mes, setMes, ano, setAno, isLoading } = usePeriodo();
 
    return (
       <div className="min-h-screen bg-background">
@@ -23,6 +23,7 @@ export function Home({ onLogout }: Props) {
                   ano={ano}
                   onMesChange={setMes}
                   onAnoChange={setAno}
+                  isLoading={isLoading}
                />
 
                <button
