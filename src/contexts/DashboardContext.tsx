@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
    listarSaldoMensal,
    listarTopCategorias,
@@ -11,6 +12,12 @@ import type {
 } from '../types/Dashboard';
 import type { ResumoCompleto } from '../types/ResumoCompleto';
 import { usePeriodo } from './PeriodoContext';
+import { listarReceitas } from '@/api/endpoints/receitas';
+import { Receita } from '@/types/Receita';
+import { listarCompromissos } from '@/api/endpoints/compromissos';
+import { Compromisso } from '@/types/Compromisso';
+import { listarGastos } from '@/api/endpoints/gastos';
+import { Gasto } from '@/types/Gasto';
 
 interface DashboardContextType {
    saldoAno: SaldoMensal[];
@@ -18,6 +25,9 @@ interface DashboardContextType {
    cartoes: Cartao[];
    resumo: ResumoCompleto | null;
    loading: boolean;
+   receitas: Receita[];
+   compromissos: Compromisso[];
+   gastos: Gasto[];
 }
 
 const DashboardContext = createContext<DashboardContextType>(
@@ -26,41 +36,42 @@ const DashboardContext = createContext<DashboardContextType>(
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
    const { mes, ano, resumo } = usePeriodo();
-   const [saldoAno, setSaldoAno] = useState<SaldoMensal[]>([]);
-   const [topCategorias, setTopCategorias] = useState<Categoria[]>([]);
-   const [cartoes, setCartoes] = useState<Cartao[]>([]);
+   const { data: saldoAno = [], isLoading: loadingSaldo } = useQuery({
+      queryKey: ['dashboard', 'saldo', ano],
+      queryFn: () => listarSaldoMensal(String(ano)),
+      placeholderData: previous => previous ?? []
+   });
 
-   const [loading, setLoading] = useState(true);
+   const { data: topCategorias = [], isLoading: loadingTop } = useQuery({
+      queryKey: ['dashboard', 'topCategorias', mes, ano],
+      queryFn: () => listarTopCategorias(mes, String(ano)),
+      placeholderData: previous => previous ?? []
+   });
 
-   useEffect(() => {
-      let cancelado = false;
+   const { data: cartoes = [], isLoading: loadingCartoes } = useQuery({
+      queryKey: ['dashboard', 'cartoes', mes, ano],
+      queryFn: () => listarCartoesResumo(mes, String(ano)),
+      placeholderData: previous => previous ?? []
+   });
 
-      async function carregar() {
-         setLoading(true);
-         try {
-            const [saldo, categorias, cards] =
-               await Promise.all([
-                  listarSaldoMensal(String(ano)),
-                  listarTopCategorias(mes, String(ano)),
-                  listarCartoesResumo(mes, String(ano)),
-               ]);
+   const { data: receitas = [], isLoading: loadingReceitas } = useQuery({
+      queryKey: ['receitas', mes, ano],
+      queryFn: () => listarReceitas(mes, String(ano)),
+      placeholderData: previous => previous ?? []
+   })
 
-            if (cancelado) return;
+   const { data: compromissos = [], isLoading: loadingCompromissos } = useQuery({
+      queryKey: ['compromissos', mes, ano],
+      queryFn: () => listarCompromissos(mes, String(ano)),
+      placeholderData: previous => previous ?? []
+   })
 
-            setSaldoAno(saldo);
-            setTopCategorias(categorias);
-            setCartoes(cards);
-         } finally {
-            if (!cancelado) setLoading(false);
-         }
-      }
+   const { data: gastos = [], isLoading: loadingGastos } = useQuery({
+      queryKey: ['gastos', mes, ano],
+      queryFn: () => listarGastos(mes, ano),
+      placeholderData: previous => previous ?? []
+   })
 
-      carregar();
-
-      return () => {
-         cancelado = true;
-      };
-   }, [mes, ano]);
 
    return (
       <DashboardContext.Provider
@@ -69,7 +80,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
             topCategorias,
             cartoes,
             resumo,
-            loading
+            receitas,
+            gastos,
+            compromissos,
+            loading: loadingSaldo || loadingTop || loadingCartoes || loadingReceitas || loadingGastos || loadingCompromissos
          }}
       >
          {children}

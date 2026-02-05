@@ -1,29 +1,32 @@
-import { useState , useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { criarGasto } from '@/api/endpoints/gastos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
-
+import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Gasto } from '@/types/Gasto'
 
 interface Props {
    aberto: boolean
    onClose: () => void
-   onSalvar: () => void
 }
 
-export function ModalNovoGasto({ aberto, onClose, onSalvar }: Props) {
+export function ModalNovoGasto({ aberto, onClose }: Props) {
+   const { mes, ano } = usePeriodo()
+   const queryClient = useQueryClient()
+
    const [descricao, setDescricao] = useState('')
    const [data, setData] = useState('')
    const [valor, setValor] = useState('')
-   const [categoria, setCategoria] = useState('');
-   const [loading, setLoading] = useState(false)
+   const [categoria, setCategoria] = useState('')
 
    const categorias = [
-      "Alimentação", "Banco", "Beleza", "Casa", "Educação",
-      "Empréstimos", "Investimento", "Lazer", "Pets", "Presentes",
-      "Roupas", "Saúde", "Serviços", "Streaming", "Telefonia",
-      "Transporte", "Viagem"
-   ];
+      'Alimentação', 'Banco', 'Beleza', 'Casa', 'Educação',
+      'Empréstimos', 'Investimento', 'Lazer', 'Pets', 'Presentes',
+      'Roupas', 'Saúde', 'Serviços', 'Streaming', 'Telefonia',
+      'Transporte', 'Viagem'
+   ]
 
    useEffect(() => {
       if (!aberto) {
@@ -31,38 +34,25 @@ export function ModalNovoGasto({ aberto, onClose, onSalvar }: Props) {
          setData('')
          setCategoria('')
          setValor('')
-         setLoading(false)
       }
    }, [aberto])
 
-   async function salvar() {
-      const valorNumero = moedaParaNumero(valor)
-
-      if (!descricao || !data || !categoria || valorNumero <= 0) {
-         alert('Preencha os campos obrigatórios')
-         return
-      }
-
-      setLoading(true)
-      try {
-         await criarGasto({
+   const criarMutation = useMutation({
+      mutationFn: () =>
+         criarGasto({
             data,
             descricao,
             categoria,
-            valor: valorNumero
-         })
-
-         onSalvar()
+            valor: moedaParaNumero(valor)
+         }),
+      onSuccess: (novoGasto) => {
+         queryClient.setQueryData<Gasto[]>(
+            ['gastos', mes, ano],
+            old => old ? [...old, novoGasto] : [novoGasto]
+         )
          onClose()
-
-         setDescricao('')
-         setData('')
-         setCategoria('')
-         setValor('')
-      } finally {
-         setLoading(false)
       }
-   }
+   })
 
    return (
       <ModalBase
@@ -70,8 +60,8 @@ export function ModalNovoGasto({ aberto, onClose, onSalvar }: Props) {
          onClose={onClose}
          titulo="Novo gasto"
          tipo="inclusao"
-         onSalvar={salvar}
-         loading={loading}
+         loading={criarMutation.isPending}
+         onSalvar={() => criarMutation.mutate()}
       >
          <div className="space-y-3">
             <div>

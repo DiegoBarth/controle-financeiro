@@ -1,5 +1,7 @@
-import { useMemo, useState, useEffect } from 'react';
-import { compromissosCache } from '../cache/compromissosCache';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { listarCompromissos } from '@/api/endpoints/compromissos';
+import { usePeriodo } from './PeriodoContext';
 
 function zerarHora(d: Date) {
    const copy = new Date(d);
@@ -8,46 +10,19 @@ function zerarHora(d: Date) {
 }
 
 export function useAlertas() {
-   const [tick, setTick] = useState(0);
-
-   useEffect(() => {
-      const oldAdd = compromissosCache.add;
-      const oldUpdate = compromissosCache.update;
-      const oldRemove = compromissosCache.remove;
-
-      const bump = () => setTick(t => t + 1);
-
-      compromissosCache.add = (...args) => {
-         oldAdd(...args);
-         bump();
-      };
-
-      compromissosCache.update = (...args) => {
-         oldUpdate(...args);
-         bump();
-      };
-
-      compromissosCache.remove = (...args) => {
-         oldRemove(...args);
-         bump();
-      };
-
-      return () => {
-         compromissosCache.add = oldAdd;
-         compromissosCache.update = oldUpdate;
-         compromissosCache.remove = oldRemove;
-      };
-   }, []);
-
+   const { mes, ano } = usePeriodo();
+   const { data: compromissos = [] } = useQuery({
+      queryKey: ['compromissos', 'alertas', ano],
+      queryFn: () => listarCompromissos('all', String(ano)),
+      placeholderData: previous => previous ?? []
+   });
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());
 
-      const compromissos = compromissosCache
-         .getAll()
-         .filter(c => !c.dataPagamento);
+      const compromissosPendentes = compromissos.filter(c => !c.dataPagamento);
 
-      const vencidos = compromissos.filter(c => {
+      const vencidos = compromissosPendentes.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
          const data = zerarHora(new Date(a, m - 1, d));
 
@@ -58,13 +33,13 @@ export function useAlertas() {
          return diffDias < 0;
       });
 
-      const vencendoHoje = compromissos.filter(c => {
+      const vencendoHoje = compromissosPendentes.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
          const data = zerarHora(new Date(a, m - 1, d));
          return data.getTime() === hoje.getTime();
       });
 
-      const vencendoSemana = compromissos.filter(c => {
+      const vencendoSemana = compromissosPendentes.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
          const data = zerarHora(new Date(a, m - 1, d));
 
@@ -80,5 +55,5 @@ export function useAlertas() {
          hoje: vencendoHoje,
          semana: vencendoSemana
       };
-   }, [tick]);
+   }, [compromissos]);
 }

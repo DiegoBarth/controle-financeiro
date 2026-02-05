@@ -1,6 +1,3 @@
-import { compromissosCache } from '../cache/compromissosCache';
-import { gastosCache } from '../cache/gastosCache';
-import { receitasCache } from '../cache/receitasCache';
 import type { Compromisso } from '../types/Compromisso';
 import type { Gasto } from '../types/Gasto';
 import type { Receita } from '../types/Receita';
@@ -29,38 +26,11 @@ export function listarResumoCompleto(mes: string, ano: string) {
 }
 
 export async function listarDados(mes: string, ano: string) {
-   const receitas =
-      mes === 'all'
-         ? receitasCache.getAll()
-         : receitasCache.get(mes, ano);
-
-   const gastos =
-      mes === 'all'
-         ? gastosCache.getAll()
-         : gastosCache.get(mes, ano);
-
-
-   const compromissos =
-      mes === 'all'
-         ? compromissosCache.getAll()
-         : compromissosCache.get(mes, ano);
-
-   if (receitas || gastos || compromissos) {
-      return {
-         compromissos: compromissosCache.get(mes, ano) || [],
-         receitas: receitasCache.get(mes, ano) || [],
-         gastos: gastosCache.get(mes, ano) || []
-      };
-   }
    const res = await apiGet<Teste>({
       acao: 'listarDados',
       mes,
       ano
    });
-
-   res.compromissos?.forEach(c => compromissosCache.add(c, 'dataVencimento'));
-   res.receitas?.forEach(r => receitasCache.add(r, 'dataPrevista'));
-   res.gastos?.forEach(g => gastosCache.add(g, 'dataPagamento'));
 
    return res;
 }
