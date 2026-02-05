@@ -3,11 +3,14 @@ import { criarCompromisso, criarCartao } from '@/api/endpoints/compromissos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { usePeriodo } from '@/contexts/PeriodoContext'
+import type { Compromisso } from '@/types/Compromisso'
 
 interface Props {
    aberto: boolean
    onClose: () => void
-   onSalvar: () => void
 }
 
 type TipoCompromisso = 'Fixo' | 'Variável' | 'Cartão' | ''
@@ -22,10 +25,14 @@ const categorias = [
 const tipos = ['Fixo', 'Variável', 'Cartão']
 const cartoes = ['Bradesco', 'Itaú', 'Mercado Pago']
 
-export function ModalNovoCompromisso({ aberto, onClose, onSalvar }: Props) {
+export function ModalNovoCompromisso({ aberto, onClose }: Props) {
+   const { mes, ano } = usePeriodo()
+   const queryClient = useQueryClient()
+
    const [descricao, setDescricao] = useState('')
    const [categoria, setCategoria] = useState('')
    const [tipo, setTipo] = useState<TipoCompromisso>('')
+
    const [valor, setValor] = useState('')
    const [dataVencimento, setDataVencimento] = useState('')
    const [meses, setMeses] = useState(1)
@@ -36,9 +43,9 @@ export function ModalNovoCompromisso({ aberto, onClose, onSalvar }: Props) {
    const [totalParcelas, setTotalParcelas] = useState<number | ''>('')
    const [dataVencimentoCartao, setDataVencimentoCartao] = useState('')
 
-   const [loading, setLoading] = useState(false)
-
-   // Regras do fixo (auto-calcular meses)
+   /* =========================
+      REGRAS FIXO
+      ========================= */
    useEffect(() => {
       if (tipo === 'Fixo' && dataVencimento) {
          const data = new Date(dataVencimento)
@@ -46,7 +53,9 @@ export function ModalNovoCompromisso({ aberto, onClose, onSalvar }: Props) {
       }
    }, [tipo, dataVencimento])
 
-   // Reset ao fechar
+   /* =========================
+      RESET AO FECHAR
+      ========================= */
    useEffect(() => {
       if (!aberto) {
          setDescricao('')
@@ -59,56 +68,77 @@ export function ModalNovoCompromisso({ aberto, onClose, onSalvar }: Props) {
          setValorTotal('')
          setTotalParcelas('')
          setDataVencimentoCartao('')
-         setLoading(false)
       }
    }, [aberto])
 
-   async function salvar() {
+   /* =========================
+      MUTATION COMPROMISSO
+      ========================= */
+   const compromissoMutation = useMutation({
+      mutationFn: criarCompromisso,
+      onSuccess: (novo: Compromisso) => {
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', mes, ano],
+            old => old ? [...old, novo] : [novo]
+         )
+      }
+   })
+
+   /* =========================
+      MUTATION CARTÃO
+      ========================= */
+   const cartaoMutation = useMutation({
+      mutationFn: criarCartao,
+      onSuccess: (novo: Compromisso) => {
+         queryClient.setQueryData<Compromisso[]>(
+            ['cartoes', mes, ano],
+            old => old ? [...old, novo] : [novo]
+         )
+      }
+   })
+
+   function salvar() {
       if (!descricao || !categoria || !tipo) {
          alert('Preencha os campos obrigatórios')
          return
       }
 
-      setLoading(true)
-
-      try {
-         if (tipo === 'Cartão') {
-            if (!cartao || !valorTotal || !totalParcelas || !dataVencimentoCartao) {
-               alert('Preencha os campos do cartão')
-               return
-            }
-
-            await criarCartao({
-               tipo: 'Cartão',
-               descricao,
-               categoria,
-               cartao,
-               valorTotal: moedaParaNumero(valorTotal),
-               parcelas: Number(totalParcelas),
-               dataVencimento: dataVencimentoCartao
-            })
-         } else {
-            if (!valor || !dataVencimento) {
-               alert('Preencha valor e data de vencimento')
-               return
-            }
-
-            await criarCompromisso({
-               tipo,
-               descricao,
-               categoria,
-               valor: moedaParaNumero(valor),
-               dataVencimento,
-               meses: tipo === 'Fixo' ? meses : 1
-            })
+      if (tipo === 'Cartão') {
+         if (!cartao || !valorTotal || !totalParcelas || !dataVencimentoCartao) {
+            alert('Preencha os campos do cartão')
+            return
          }
 
-         onSalvar()
-         onClose()
-      } finally {
-         setLoading(false)
+         cartaoMutation.mutate({
+            tipo: 'Cartão',
+            descricao,
+            categoria,
+            cartao,
+            valorTotal: moedaParaNumero(valorTotal),
+            parcelas: Number(totalParcelas),
+            dataVencimento: dataVencimentoCartao
+         })
+      } else {
+         if (!valor || !dataVencimento) {
+            alert('Preencha valor e data de vencimento')
+            return
+         }
+
+         compromissoMutation.mutate({
+            tipo,
+            descricao,
+            categoria,
+            valor: moedaParaNumero(valor),
+            dataVencimento,
+            meses: tipo === 'Fixo' ? meses : 1
+         })
       }
+
+      onClose()
    }
+
+   const loading =
+      compromissoMutation.isPending || cartaoMutation.isPending
 
    return (
       <ModalBase
@@ -148,7 +178,6 @@ export function ModalNovoCompromisso({ aberto, onClose, onSalvar }: Props) {
                   onChange={value => setTipo(value as TipoCompromisso)}
                   options={tipos}
                />
-
             </div>
 
             {/* Fixo / Variável */}

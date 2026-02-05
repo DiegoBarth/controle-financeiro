@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { listarResumoCompleto } from '../api/home';
 import type { ResumoCompleto } from '../types/ResumoCompleto';
 
@@ -52,24 +53,13 @@ export function PeriodoProvider({ children }: { children: ReactNode }) {
    const [mes, setMes] = useState<string>(periodoInicial.mes);
    const [ano, setAno] = useState<number>(periodoInicial.ano);
 
-   const [resumo, setResumo] = useState<ResumoCompleto>(resumoInicial);
-   const [loadingResumo, setLoadingResumo] = useState(false);
-
-   async function carregarResumo(mes: string, ano: number) {
-      setLoadingResumo(true);
-      try {
-         const res = await listarResumoCompleto(mes, String(ano));
-         setResumo(res);
-      } catch (err) {
-         console.error('Erro ao carregar resumo', err);
-      } finally {
-         setLoadingResumo(false);
-      }
-   }
+   const { data: resumo = resumoInicial, isLoading: loadingResumo } = useQuery({
+      queryKey: ['resumo', mes, ano],
+      queryFn: () => listarResumoCompleto(mes, String(ano)),
+      placeholderData: previous => previous ?? resumoInicial
+   });
 
    useEffect(() => {
-      carregarResumo(mes, ano);
-
       sessionStorage.setItem(
          'periodo',
          JSON.stringify({ mes, ano })

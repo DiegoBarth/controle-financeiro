@@ -1,5 +1,4 @@
 import { apiGet, apiPost } from '@/api/client';
-import { receitasCache } from '@/cache/receitasCache';
 import type { Receita } from '@/types/Receita';
 import { formatarDataBR } from '@/utils/formatadores';
 
@@ -14,22 +13,15 @@ export async function criarReceita(payload: {
       ...payload
    });
 
-   receitasCache.add(res, 'dataPrevista');
-
    return res;
 }
 
 export async function listarReceitas(mes: string, ano: string) {
-   const cached = receitasCache.get(mes, ano);
-   if (cached) return cached;
-
    const dados = await apiGet<Receita[]>({
       acao: 'listarReceitas',
       mes,
       ano
    });
-
-   receitasCache.set(mes, ano, dados);
 
    return dados;
 }
@@ -40,8 +32,6 @@ export async function excluirReceita(rowIndex: number, mes: string, ano: string)
       rowIndex
    });
 
-   receitasCache.remove(mes, ano, rowIndex);
-   
    return res;
 }
 
@@ -56,8 +46,6 @@ export async function atualizarReceita(payload: {
    });
 
    payload.dataRecebimento = payload.dataRecebimento ? formatarDataBR(payload.dataRecebimento) : '';
-
-   receitasCache.update(mes, ano, payload);
 
    return res;
 }

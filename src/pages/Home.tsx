@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { listarDados } from '../api/home';
 import { AcoesRapidas } from "../components/home/AcoesRapidas"
 import { Alertas } from "../components/home/Alertas"
 import { FiltrosPeriodo } from "../components/home/FiltrosPeriodo"
@@ -12,13 +10,6 @@ interface Props {
 
 export function Home({ onLogout }: Props) {
    const { mes, setMes, ano, setAno } = usePeriodo();
-
-   useEffect(() => {
-      async function preload() {
-         await listarDados(mes, String(ano));
-      }
-      preload();
-   }, [mes, ano]);
 
    return (
       <div className="min-h-screen bg-background">

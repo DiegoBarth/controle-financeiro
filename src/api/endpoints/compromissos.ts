@@ -1,19 +1,14 @@
 import { apiGet, apiPost } from '@/api/client';
-import { compromissosCache } from '@/cache/compromissosCache';
 import type { Compromisso } from '@/types/Compromisso';
 import { formatarDataBR } from '@/utils/formatadores';
 
 export async function listarCompromissos(mes: string, ano: string) {
-   const cached = compromissosCache.get(mes, ano);
-   if (cached) return cached;
-
    const dados = await apiGet<Compromisso[]>({
       acao: 'listarCompromissos',
       mes,
       ano
    });
 
-   compromissosCache.set(mes, ano, dados);
    return dados;
 }
 
@@ -25,12 +20,10 @@ export async function criarCompromisso(payload: {
    dataVencimento: string;
    meses?: number;
 }) {
-   const res = await apiPost<Compromisso[]>({
+   const res = await apiPost<Compromisso>({
       acao: 'criarCompromisso',
       ...payload
    });
-
-   res.forEach(p => compromissosCache.add(p, 'dataVencimento'));
 
    return res;
 }
@@ -44,12 +37,10 @@ export async function criarCartao(payload: {
    parcelas: number;
    dataVencimento: string;
 }) {
-   const res = await apiPost<Compromisso[]>({
+   const res = await apiPost<Compromisso>({
       acao: 'criarCartao',
       ...payload
    });
-
-   res.forEach(p => compromissosCache.add(p, 'dataVencimento'));
 
    return res;
 }
@@ -66,7 +57,6 @@ export async function excluirCompromisso(
       scope
    });
 
-   compromissosCache.remove(mes, ano, rowIndex);
    return res;
 }
 
@@ -82,6 +72,5 @@ export async function atualizarCompromisso(
 
    payload.dataPagamento = payload.dataPagamento ? formatarDataBR(payload.dataPagamento) : '';
 
-   compromissosCache.update(mes, ano, payload);
    return res;
 }

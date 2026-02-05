@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react'
 import { atualizarCompromisso, excluirCompromisso } from '@/api/endpoints/compromissos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
-import { formatarMoeda, moedaParaNumero, numeroParaMoeda } from '@/utils/formatadores'
+import {
+   formatarMoeda,
+   moedaParaNumero,
+   numeroParaMoeda
+} from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Props {
    aberto: boolean
@@ -12,12 +17,17 @@ interface Props {
    onConfirmar: (rowIndex: number) => void
 }
 
-export function ModalEditarCompromisso({ aberto, compromisso, onClose, onConfirmar }: Props) {
+export function ModalEditarCompromisso({
+   aberto,
+   compromisso,
+   onClose,
+   onConfirmar
+}: Props) {
    const { mes, ano } = usePeriodo()
+   const queryClient = useQueryClient()
+
    const [valor, setValor] = useState('')
    const [dataPagamento, setDataPagamento] = useState('')
-   const [loading, setLoading] = useState(false)
-   const [acao, setAcao] = useState<'salvando' | 'excluindo' | null>(null)
 
    useEffect(() => {
       if (compromisso) {
@@ -26,46 +36,52 @@ export function ModalEditarCompromisso({ aberto, compromisso, onClose, onConfirm
       }
    }, [compromisso])
 
-   if (!compromisso) return null
-
-   async function handleSalvar() {
-      if (!compromisso) return;
-
-      setLoading(true)
-      setAcao('salvando')
-      try {
-         await atualizarCompromisso(
+   const atualizarMutation = useMutation({
+      mutationFn: () =>
+         atualizarCompromisso(
             {
-               rowIndex: compromisso.rowIndex,
+               rowIndex: compromisso!.rowIndex,
                valor: moedaParaNumero(valor),
                dataPagamento
             },
             mes,
             String(ano)
+         ),
+      onSuccess: () => {
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', mes, ano],
+            old =>
+               old?.map(c =>
+                  c.rowIndex === compromisso!.rowIndex
+                     ? { ...c, valor: moedaParaNumero(valor) }
+                     : c
+               ) ?? []
+         )
+         if (compromisso) {
+            onConfirmar(compromisso.rowIndex)
+         }
+         onClose()
+      }
+   })
+
+   const excluirMutation = useMutation({
+      mutationFn: () =>
+         excluirCompromisso(compromisso!.rowIndex, mes, String(ano)),
+      onSuccess: () => {
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', mes, ano],
+            old =>
+               old?.filter(c => c.rowIndex !== compromisso!.rowIndex) ?? []
          )
 
-         onConfirmar(compromisso.rowIndex)
+         if (compromisso) {
+            onConfirmar(compromisso.rowIndex)
+         }
          onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
       }
-   }
+   })
 
-   async function handleExcluir() {
-      if (!compromisso) return
-
-      setLoading(true)
-      setAcao('excluindo')
-      try {
-         await excluirCompromisso(compromisso.rowIndex, mes, String(ano))
-         onConfirmar(compromisso.rowIndex)
-         onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
-      }
-   }
+   if (!compromisso) return null
 
    return (
       <ModalBase
@@ -73,14 +89,15 @@ export function ModalEditarCompromisso({ aberto, compromisso, onClose, onConfirm
          onClose={onClose}
          titulo={compromisso.descricao}
          tipo="edicao"
-         loading={loading}
-         loadingTexto={acao === 'excluindo' ? 'Excluindo...' : 'Salvando...'}
-         onSalvar={handleSalvar}
-         onExcluir={handleExcluir}
+         loading={atualizarMutation.isPending || excluirMutation.isPending}
+         onSalvar={() => atualizarMutation.mutate()}
+         onExcluir={() => excluirMutation.mutate()}
       >
          <div className="space-y-3">
             <div>
-               <label className="block text-xs text-muted-foreground">Valor</label>
+               <label className="block text-xs text-muted-foreground">
+                  Valor
+               </label>
                <input
                   className="w-full border rounded-md p-2"
                   value={valor}

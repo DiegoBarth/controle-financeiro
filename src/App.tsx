@@ -8,11 +8,27 @@ import { Dashboard } from "./pages/Dashboard";
 import { Gastos } from "./pages/Gastos";
 import { Home } from "./pages/Home";
 import { Receitas } from "./pages/Receitas";
+import { PeriodoProvider } from "./contexts/PeriodoContext";
+import { DashboardProvider } from "./contexts/DashboardContext";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const AUTH_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 dias
 
 function App() {
    const toast = useToast();
+   const [queryClient] = useState(
+      () =>
+         new QueryClient({
+            defaultOptions: {
+               queries: {
+                  staleTime: 1000 * 60 * 5,
+                  refetchOnWindowFocus: false,
+                  refetchOnReconnect: false
+               }
+            }
+         })
+   );
 
    const [userEmail, setUserEmail] = useState<string | null>(() => {
       const saved = localStorage.getItem("user_email");
@@ -55,6 +71,7 @@ function App() {
       googleLogout();
       localStorage.removeItem("user_email");
       localStorage.removeItem("login_time");
+      queryClient.clear();
       setUserEmail(null);
       toast.info('Você foi desconectado');
    };
@@ -96,14 +113,21 @@ function App() {
 
    return (
       <>
-         <Routes>
-            <Route path="/" element={<Home onLogout={() => handleLogout()} />} />
-            <Route path="/gastos" element={<Gastos />} />
-            <Route path="/compromissos" element={<Compromissos />} />
-            <Route path="/receitas" element={<Receitas />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<Navigate to="/" />} />
-         </Routes>
+         <QueryClientProvider client={queryClient}>
+            <PeriodoProvider>
+               <DashboardProvider>
+                  <Routes>
+                     <Route path="/" element={<Home onLogout={() => handleLogout()} />} />
+                     <Route path="/gastos" element={<Gastos />} />
+                     <Route path="/compromissos" element={<Compromissos />} />
+                     <Route path="/receitas" element={<Receitas />} />
+                     <Route path="/dashboard" element={<Dashboard />} />
+                     <Route path="*" element={<Navigate to="/" />} />
+                  </Routes>
+               </DashboardProvider>
+            </PeriodoProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
+         </QueryClientProvider>
       </>
    );
 }

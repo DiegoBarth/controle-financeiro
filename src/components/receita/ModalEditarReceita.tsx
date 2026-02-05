@@ -2,67 +2,79 @@ import { useEffect, useState } from 'react'
 import { atualizarReceita, excluirReceita } from '@/api/endpoints/receitas'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Receita } from '@/types/Receita'
-import { numeroParaMoeda, moedaParaNumero, dataBRParaISO, formatarMoeda } from '@/utils/formatadores'
+import {
+   numeroParaMoeda,
+   moedaParaNumero,
+   dataBRParaISO,
+   formatarMoeda,
+   formatarDataBR
+} from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Props {
    aberto: boolean
    receita: Receita | null
    onClose: () => void
-   onConfirmar: () => void
 }
 
-export function ModalEditarReceita({ aberto, receita, onClose, onConfirmar }: Props) {
+export function ModalEditarReceita({ aberto, receita, onClose }: Props) {
    const { mes, ano } = usePeriodo()
+   const queryClient = useQueryClient()
+
    const [valor, setValor] = useState('')
    const [dataRecebimento, setDataRecebimento] = useState('')
-   const [loading, setLoading] = useState(false)
-   const [acao, setAcao] = useState<'salvando' | 'excluindo' | null>(null)
 
    useEffect(() => {
       if (receita) {
+         console.log(receita)
          setValor(numeroParaMoeda(receita.valor))
          setDataRecebimento(
-            receita.dataRecebimento ? dataBRParaISO(receita.dataRecebimento) : new Date().toISOString().slice(0, 10)
+            receita.dataRecebimento
+               ? dataBRParaISO(receita.dataRecebimento)
+               : new Date().toISOString().slice(0, 10)
          )
       }
    }, [receita])
 
-   if (!receita) return null
-
-   async function handleSalvar() {
-      if (!receita) return;
-
-      setLoading(true)
-      setAcao('salvando')
-      try {
-         await atualizarReceita(
-            { rowIndex: receita.rowIndex, valor: moedaParaNumero(valor), dataRecebimento },
+   const atualizarMutation = useMutation({
+      mutationFn: () =>
+         atualizarReceita(
+            {
+               rowIndex: receita!.rowIndex,
+               valor: moedaParaNumero(valor),
+               dataRecebimento
+            },
             mes,
             String(ano)
+         ),
+      onSuccess: () => {
+         queryClient.setQueryData<Receita[]>(
+            ['receitas', mes, ano],
+            old =>
+               old?.map(r =>
+                  r.rowIndex === receita!.rowIndex
+                     ? { ...r, valor: moedaParaNumero(valor), dataRecebimento: formatarDataBR(String(dataRecebimento)) }
+                     : r
+               ) ?? []
          )
-         onConfirmar()
          onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
       }
-   }
+   })
 
-   async function handleExcluir() {
-      if (!receita) return
-
-      setLoading(true)
-      setAcao('excluindo')
-      try {
-         await excluirReceita(receita.rowIndex, mes, String(ano))
-         onConfirmar()
+   const excluirMutation = useMutation({
+      mutationFn: () =>
+         excluirReceita(receita!.rowIndex, mes, String(ano)),
+      onSuccess: () => {
+         queryClient.setQueryData<Receita[]>(
+            ['receitas', mes, ano],
+            old => old?.filter(r => r.rowIndex !== receita!.rowIndex) ?? []
+         )
          onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
       }
-   }
+   })
+
+   if (!receita) return null
 
    return (
       <ModalBase
@@ -70,10 +82,9 @@ export function ModalEditarReceita({ aberto, receita, onClose, onConfirmar }: Pr
          onClose={onClose}
          titulo={receita.descricao}
          tipo="edicao"
-         loading={loading}
-         loadingTexto={acao === 'excluindo' ? 'Excluindo...' : 'Salvando...'}
-         onSalvar={handleSalvar}
-         onExcluir={handleExcluir}
+         loading={atualizarMutation.isPending || excluirMutation.isPending}
+         onSalvar={() => atualizarMutation.mutate()}
+         onExcluir={() => excluirMutation.mutate()}
       >
          <div className="space-y-3">
             <div>
@@ -86,7 +97,9 @@ export function ModalEditarReceita({ aberto, receita, onClose, onConfirmar }: Pr
             </div>
 
             <div>
-               <label className="block text-xs text-muted-foreground">Data de recebimento</label>
+               <label className="block text-xs text-muted-foreground">
+                  Data de recebimento
+               </label>
                <input
                   type="date"
                   className="w-full border rounded-md p-2"

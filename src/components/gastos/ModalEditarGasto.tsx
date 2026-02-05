@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { atualizarGasto, excluirGasto } from '@/api/endpoints/gastos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Gasto } from '@/types/Gasto'
@@ -9,14 +10,13 @@ interface Props {
    aberto: boolean
    gasto: Gasto | null
    onClose: () => void
-   onConfirmar: () => void
 }
 
-export function ModalEditarGasto({ aberto, gasto, onClose, onConfirmar }: Props) {
+export function ModalEditarGasto({ aberto, gasto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
+   const queryClient = useQueryClient()
+
    const [valor, setValor] = useState('')
-   const [loading, setLoading] = useState(false)
-   const [acao, setAcao] = useState<'salvando' | 'excluindo' | null>(null)
 
    useEffect(() => {
       if (gasto) {
@@ -24,41 +24,40 @@ export function ModalEditarGasto({ aberto, gasto, onClose, onConfirmar }: Props)
       }
    }, [gasto])
 
-   if (!gasto) return null
-
-   async function handleSalvar() {
-      if (!gasto) return;
-
-      setLoading(true)
-      setAcao('salvando')
-      try {
-         await atualizarGasto(
-            { rowIndex: gasto.rowIndex, valor: moedaParaNumero(valor) },
+   const atualizarMutation = useMutation({
+      mutationFn: () =>
+         atualizarGasto(
+            { rowIndex: gasto!.rowIndex, valor: moedaParaNumero(valor) },
             mes,
             String(ano)
+         ),
+      onSuccess: () => {
+         queryClient.setQueryData<Gasto[]>(
+            ['gastos', mes, ano],
+            old =>
+               old?.map(g =>
+                  g.rowIndex === gasto!.rowIndex
+                     ? { ...g, valor: moedaParaNumero(valor) }
+                     : g
+               ) ?? []
          )
-         onConfirmar()
          onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
       }
-   }
+   })
 
-   async function handleExcluir() {
-      if (!gasto) return
-
-      setLoading(true)
-      setAcao('excluindo')
-      try {
-         await excluirGasto(gasto.rowIndex, mes, String(ano))
-         onConfirmar()
+   const excluirMutation = useMutation({
+      mutationFn: () =>
+         excluirGasto(gasto!.rowIndex, mes, String(ano)),
+      onSuccess: () => {
+         queryClient.setQueryData<Gasto[]>(
+            ['gastos', mes, ano],
+            old => old?.filter(g => g.rowIndex !== gasto!.rowIndex) ?? []
+         )
          onClose()
-      } finally {
-         setLoading(false)
-         setAcao(null)
       }
-   }
+   })
+
+   if (!gasto) return null
 
    return (
       <ModalBase
@@ -66,10 +65,9 @@ export function ModalEditarGasto({ aberto, gasto, onClose, onConfirmar }: Props)
          onClose={onClose}
          titulo={gasto.descricao}
          tipo="edicao"
-         loading={loading}
-         loadingTexto={acao === 'excluindo' ? 'Excluindo...' : 'Salvando...'}
-         onSalvar={handleSalvar}
-         onExcluir={handleExcluir}
+         loading={atualizarMutation.isPending || excluirMutation.isPending}
+         onSalvar={() => atualizarMutation.mutate()}
+         onExcluir={() => excluirMutation.mutate()}
       >
          <div className="space-y-3">
             <div>
