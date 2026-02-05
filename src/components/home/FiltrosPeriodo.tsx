@@ -7,12 +7,14 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { usePeriodo } from "@/contexts/PeriodoContext"
+import { Skeleton } from "../ui/Skeleton"
 
 interface FiltrosPeriodoProps {
    mes: string
    ano: number
    onMesChange: (mes: string) => void
-   onAnoChange: (ano: number) => void
+   onAnoChange: (ano: number) => void,
+   isLoading: boolean
 }
 
 const meses = [
@@ -36,6 +38,7 @@ export function FiltrosPeriodo({
    ano,
    onMesChange,
    onAnoChange,
+   isLoading
 }: FiltrosPeriodoProps) {
    const { resumo } = usePeriodo();
 
@@ -77,11 +80,19 @@ export function FiltrosPeriodo({
                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-               {anos.map((a) => (
-                  <DropdownMenuItem key={a} onClick={() => onAnoChange(a)}>
-                     {a}
-                  </DropdownMenuItem>
-               ))}
+               {isLoading ? (
+                  <div className="flex flex-col gap-2 p-2 w-25 shadow-sm">
+                     <Skeleton className="h-5 w-12 rounded-sm" />
+                     <Skeleton className="h-5 w-12 rounded-sm" />
+                     <Skeleton className="h-5 w-12 rounded-sm" />
+                  </div>
+               ) : (
+                  anos.map((a) => (
+                     <DropdownMenuItem key={a} onClick={() => onAnoChange(a)}>
+                        {a}
+                     </DropdownMenuItem>
+                  ))
+               )}
             </DropdownMenuContent>
          </DropdownMenu>
       </div>
