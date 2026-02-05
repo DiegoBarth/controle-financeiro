@@ -3,6 +3,7 @@ import { atualizarCompromisso, excluirCompromisso } from '@/api/endpoints/compro
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
 import {
+   formatarDataBR,
    formatarMoeda,
    moedaParaNumero,
    numeroParaMoeda
@@ -53,10 +54,25 @@ export function ModalEditarCompromisso({
             old =>
                old?.map(c =>
                   c.rowIndex === compromisso!.rowIndex
-                     ? { ...c, valor: moedaParaNumero(valor) }
+                     ? {
+                        ...c,
+                        valor: moedaParaNumero(valor),
+                        dataPagamento
+                     }
                      : c
                ) ?? []
          )
+
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', 'alertas', ano],
+            old =>
+               old?.map(c =>
+                  c.rowIndex === compromisso!.rowIndex
+                     ? { ...c, dataPagamento: formatarDataBR(dataPagamento) }
+                     : c
+               ) ?? []
+         );
+
          if (compromisso) {
             onConfirmar(compromisso.rowIndex)
          }
@@ -70,6 +86,12 @@ export function ModalEditarCompromisso({
       onSuccess: () => {
          queryClient.setQueryData<Compromisso[]>(
             ['compromissos', mes, ano],
+            old =>
+               old?.filter(c => c.rowIndex !== compromisso!.rowIndex) ?? []
+         )
+
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', 'alertas', ano],
             old =>
                old?.filter(c => c.rowIndex !== compromisso!.rowIndex) ?? []
          )

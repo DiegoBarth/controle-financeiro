@@ -1,7 +1,6 @@
 import { useAlertas } from "@/contexts/UseAlertas"
 import type { Compromisso } from "@/types/Compromisso"
 
-
 interface AlertaCardProps {
    titulo: string
    gradientFrom: string
@@ -34,7 +33,6 @@ function AlertaCard({ titulo, gradientFrom, gradientTo, onClick }: AlertaCardPro
       </button>
    )
 }
-
 
 import { useState } from "react"
 import { ModalEditarCompromisso } from "../compromissos/ModalEditarCompromisso"
@@ -153,6 +151,18 @@ export function Alertas() {
          </div>
 
          {/* MODAIS */}
+         <ModalCompromissos
+            aberto={tipoAberto === "vencido"}
+            titulo="Vencidos"
+            itens={jaVencidos}
+            onClose={() => setTipoAberto(null)}
+            onSelect={item => {
+               setTipoOrigem(tipoAberto)
+               setTipoAberto(null)
+               setCompromissoSelecionado(item)
+            }}
+         />
+
          <ModalCompromissos
             aberto={tipoAberto === "hoje"}
             titulo="Vencem hoje"
