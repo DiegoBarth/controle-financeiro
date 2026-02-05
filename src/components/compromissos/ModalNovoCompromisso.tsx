@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
-import { criarCompromisso, criarCartao } from '@/api/endpoints/compromissos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { usePeriodo } from '@/contexts/PeriodoContext'
-import type { Compromisso } from '@/types/Compromisso'
+import { useCompromissos } from '@/hooks/useCompromissos'
 
 interface Props {
    aberto: boolean
@@ -27,7 +25,7 @@ const cartoes = ['Bradesco', 'Itaú', 'Mercado Pago']
 
 export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
+   const { criar, criarCartao, isSalvando } = useCompromissos(mes, String(ano))
 
    const [descricao, setDescricao] = useState('')
    const [categoria, setCategoria] = useState('')
@@ -37,15 +35,11 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const [dataVencimento, setDataVencimento] = useState('')
    const [meses, setMeses] = useState(1)
 
-   // Cartão
    const [cartao, setCartao] = useState('')
    const [valorTotal, setValorTotal] = useState('')
    const [totalParcelas, setTotalParcelas] = useState<number | ''>('')
    const [dataVencimentoCartao, setDataVencimentoCartao] = useState('')
 
-   /* =========================
-      REGRAS FIXO
-      ========================= */
    useEffect(() => {
       if (tipo === 'Fixo' && dataVencimento) {
          const data = new Date(dataVencimento)
@@ -53,9 +47,6 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
       }
    }, [tipo, dataVencimento])
 
-   /* =========================
-      RESET AO FECHAR
-      ========================= */
    useEffect(() => {
       if (!aberto) {
          setDescricao('')
@@ -71,33 +62,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
       }
    }, [aberto])
 
-   /* =========================
-      MUTATION COMPROMISSO
-      ========================= */
-   const compromissoMutation = useMutation({
-      mutationFn: criarCompromisso,
-      onSuccess: (novo: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            ['compromissos', mes, ano],
-            old => old ? [...old, novo] : [novo]
-         )
-      }
-   })
-
-   /* =========================
-      MUTATION CARTÃO
-      ========================= */
-   const cartaoMutation = useMutation({
-      mutationFn: criarCartao,
-      onSuccess: (novo: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            ['cartoes', mes, ano],
-            old => old ? [...old, novo] : [novo]
-         )
-      }
-   })
-
-   function salvar() {
+   function handleSalvar() {
       if (!descricao || !categoria || !tipo) {
          alert('Preencha os campos obrigatórios')
          return
@@ -109,12 +74,12 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             return
          }
 
-         cartaoMutation.mutate({
+         criarCartao({
             tipo: 'Cartão',
             descricao,
             categoria,
             cartao,
-            valorTotal: moedaParaNumero(valorTotal),
+            valor: moedaParaNumero(valorTotal),
             parcelas: Number(totalParcelas),
             dataVencimento: dataVencimentoCartao
          })
@@ -124,7 +89,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             return
          }
 
-         compromissoMutation.mutate({
+         criar({
             tipo,
             descricao,
             categoria,
@@ -134,11 +99,19 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          })
       }
 
+      setDescricao('')
+      setCategoria('')
+      setTipo('')
+      setValor('')
+      setDataVencimento('')
+      setMeses(1)
+      setCartao('')
+      setValorTotal('')
+      setTotalParcelas('')
+      setDataVencimentoCartao('')
+
       onClose()
    }
-
-   const loading =
-      compromissoMutation.isPending || cartaoMutation.isPending
 
    return (
       <ModalBase
@@ -146,8 +119,8 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          onClose={onClose}
          titulo="Novo compromisso"
          tipo="inclusao"
-         onSalvar={salvar}
-         loading={loading}
+         onSalvar={handleSalvar}
+         loading={isSalvando}
       >
          <div className="space-y-3">
             {/* Descrição */}

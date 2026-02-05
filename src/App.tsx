@@ -2,14 +2,13 @@ import { GoogleLogin, googleLogout } from "@react-oauth/google";
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useToast } from '@/contexts/toast';
-import { verificarEmailPossuiAutorizacao } from "./api/home";
+import { verificarEmailPossuiAutorizacao } from "./api/endpoints/home";
 import { Compromissos } from "./pages/Compromissos";
 import { Dashboard } from "./pages/Dashboard";
 import { Gastos } from "./pages/Gastos";
 import { Home } from "./pages/Home";
 import { Receitas } from "./pages/Receitas";
 import { PeriodoProvider } from "./contexts/PeriodoContext";
-import { DashboardProvider } from "./contexts/DashboardContext";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
@@ -115,7 +114,6 @@ function App() {
       <>
          <QueryClientProvider client={queryClient}>
             <PeriodoProvider>
-               <DashboardProvider>
                   <Routes>
                      <Route path="/" element={<Home onLogout={() => handleLogout()} />} />
                      <Route path="/gastos" element={<Gastos />} />
@@ -124,7 +122,6 @@ function App() {
                      <Route path="/dashboard" element={<Dashboard />} />
                      <Route path="*" element={<Navigate to="/" />} />
                   </Routes>
-               </DashboardProvider>
             </PeriodoProvider>
             <ReactQueryDevtools initialIsOpen={false} />
          </QueryClientProvider>

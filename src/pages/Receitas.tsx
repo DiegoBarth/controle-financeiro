@@ -1,26 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { listarReceitas } from '@/api/endpoints/receitas'
 import { ModalNovaReceita } from '@/components/receita/ModalNovaReceita'
 import { ReceitaLista } from '@/components/receita/ReceitaLista'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { ModalEditarReceita } from '@/components/receita/ModalEditarReceita'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Receita } from '@/types/Receita'
+import { useReceitas } from '@/hooks/useReceitas'
 
 export function Receitas() {
    const { mes, ano } = usePeriodo()
+   const { receitas, isLoading } = useReceitas(mes, String(ano))
    const navigate = useNavigate()
 
    const [receitaSelecionada, setReceitaSelecionada] = useState<Receita | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
-
-   const { data: receitas = [], isLoading } = useQuery({
-      queryKey: ['receitas', mes, ano],
-      queryFn: () => listarReceitas(mes, String(ano)),
-      staleTime: Infinity
-   })
 
    if (isLoading) {
       return (

@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
-import { atualizarReceita, excluirReceita } from '@/api/endpoints/receitas'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Receita } from '@/types/Receita'
 import {
    numeroParaMoeda,
    moedaParaNumero,
    dataBRParaISO,
-   formatarMoeda,
-   formatarDataBR
+   formatarMoeda
 } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useReceitas } from '@/hooks/useReceitas'
 
 interface Props {
    aberto: boolean
@@ -20,14 +18,13 @@ interface Props {
 
 export function ModalEditarReceita({ aberto, receita, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
+   const { atualizar, excluir, isSalvando, isExcluindo } = useReceitas(mes, String(ano))
 
    const [valor, setValor] = useState('')
    const [dataRecebimento, setDataRecebimento] = useState('')
 
    useEffect(() => {
       if (receita) {
-         console.log(receita)
          setValor(numeroParaMoeda(receita.valor))
          setDataRecebimento(
             receita.dataRecebimento
@@ -37,42 +34,23 @@ export function ModalEditarReceita({ aberto, receita, onClose }: Props) {
       }
    }, [receita])
 
-   const atualizarMutation = useMutation({
-      mutationFn: () =>
-         atualizarReceita(
-            {
-               rowIndex: receita!.rowIndex,
-               valor: moedaParaNumero(valor),
-               dataRecebimento
-            },
-            mes,
-            String(ano)
-         ),
-      onSuccess: () => {
-         queryClient.setQueryData<Receita[]>(
-            ['receitas', mes, ano],
-            old =>
-               old?.map(r =>
-                  r.rowIndex === receita!.rowIndex
-                     ? { ...r, valor: moedaParaNumero(valor), dataRecebimento: formatarDataBR(String(dataRecebimento)) }
-                     : r
-               ) ?? []
-         )
-         onClose()
-      }
-   })
+   const handleAtualizar = async () => {
+      await atualizar({
+         rowIndex: receita!.rowIndex,
+         valor: moedaParaNumero(valor),
+         dataRecebimento
+      })
+      setValor('')
+      setDataRecebimento('')
 
-   const excluirMutation = useMutation({
-      mutationFn: () =>
-         excluirReceita(receita!.rowIndex, mes, String(ano)),
-      onSuccess: () => {
-         queryClient.setQueryData<Receita[]>(
-            ['receitas', mes, ano],
-            old => old?.filter(r => r.rowIndex !== receita!.rowIndex) ?? []
-         )
-         onClose()
-      }
-   })
+      onClose()
+   }
+
+   const handleExcluir = async () => {
+      await excluir(receita!.rowIndex)
+
+      onClose()
+   }
 
    if (!receita) return null
 
@@ -82,9 +60,10 @@ export function ModalEditarReceita({ aberto, receita, onClose }: Props) {
          onClose={onClose}
          titulo={receita.descricao}
          tipo="edicao"
-         loading={atualizarMutation.isPending || excluirMutation.isPending}
-         onSalvar={() => atualizarMutation.mutate()}
-         onExcluir={() => excluirMutation.mutate()}
+         loading={isSalvando || isExcluindo}
+         loadingTexto={(isSalvando ? 'Salvando...' : 'Excluindo...')}
+         onSalvar={() => handleAtualizar()}
+         onExcluir={() => handleExcluir()}
       >
          <div className="space-y-3">
             <div>

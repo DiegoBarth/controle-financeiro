@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { criarGasto } from '@/api/endpoints/gastos'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
 import { SelectCustomizado } from '../ui/SelectCustomizado'
 import { usePeriodo } from '@/contexts/PeriodoContext'
-import type { Gasto } from '@/types/Gasto'
+import { useGastos } from '@/hooks/useGastos'
 
 interface Props {
    aberto: boolean
@@ -14,10 +12,10 @@ interface Props {
 
 export function ModalNovoGasto({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
+   const { criar, isSalvando } = useGastos(mes, String(ano))
 
    const [descricao, setDescricao] = useState('')
-   const [data, setData] = useState('')
+   const [dataPagamento, setDataPagamento] = useState('')
    const [valor, setValor] = useState('')
    const [categoria, setCategoria] = useState('')
 
@@ -31,28 +29,26 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
    useEffect(() => {
       if (!aberto) {
          setDescricao('')
-         setData('')
+         setDataPagamento('')
          setCategoria('')
          setValor('')
       }
    }, [aberto])
 
-   const criarMutation = useMutation({
-      mutationFn: () =>
-         criarGasto({
-            data,
-            descricao,
-            categoria,
-            valor: moedaParaNumero(valor)
-         }),
-      onSuccess: (novoGasto) => {
-         queryClient.setQueryData<Gasto[]>(
-            ['gastos', mes, ano],
-            old => old ? [...old, novoGasto] : [novoGasto]
-         )
-         onClose()
-      }
-   })
+   const handleSalvar = async () => {
+      await criar({
+         descricao,
+         categoria,
+         valor: moedaParaNumero(valor),
+         dataPagamento
+      })
+      setDescricao('')
+      setDataPagamento('')
+      setCategoria('')
+      setValor('')
+
+      onClose()
+   }
 
    return (
       <ModalBase
@@ -60,8 +56,8 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
          onClose={onClose}
          titulo="Novo gasto"
          tipo="inclusao"
-         loading={criarMutation.isPending}
-         onSalvar={() => criarMutation.mutate()}
+         loading={isSalvando}
+         onSalvar={() => handleSalvar()}
       >
          <div className="space-y-3">
             <div>
@@ -78,8 +74,8 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
                <input
                   type="date"
                   className="mt-1 w-full rounded-md border p-2"
-                  value={data}
-                  onChange={e => setData(e.target.value)}
+                  value={dataPagamento}
+                  onChange={e => setDataPagamento(e.target.value)}
                />
             </div>
 

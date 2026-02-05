@@ -31,10 +31,10 @@ export async function criarCompromisso(payload: {
 export async function criarCartao(payload: {
    descricao: string;
    categoria: string;
-   cartao: string;
-   valorTotal: number;
+   cartao?: string;
+   valor: number;
    tipo: string;
-   parcelas: number;
+   parcelas?: number;
    dataVencimento: string;
 }) {
    const res = await apiPost<Compromisso>({
@@ -47,8 +47,6 @@ export async function criarCartao(payload: {
 
 export async function excluirCompromisso(
    rowIndex: number,
-   mes: string,
-   ano: string,
    scope: 'single' | 'future' | 'all' = 'single'
 ) {
    const res = await apiPost({
@@ -61,9 +59,7 @@ export async function excluirCompromisso(
 }
 
 export async function atualizarCompromisso(
-   payload: { rowIndex: number; valor: number; dataPagamento: string; scope?: 'single' | 'future' },
-   mes: string,
-   ano: string
+   payload: { rowIndex: number; valor: number; dataPagamento: string; scope?: 'single' | 'future' }
 ) {
    const res = await apiPost({
       acao: 'atualizarCompromisso',

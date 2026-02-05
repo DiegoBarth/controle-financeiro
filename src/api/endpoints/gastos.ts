@@ -2,10 +2,10 @@ import { apiGet, apiPost } from '@/api/client';
 import type { Gasto } from '@/types/Gasto';
 
 export async function criarGasto(payload: {
-   data: string;
    descricao: string;
    categoria: string;
    valor: number;
+   dataPagamento: string;
 }) {
    const res = await apiPost<Gasto>({
       acao: 'criarGasto',
@@ -15,7 +15,7 @@ export async function criarGasto(payload: {
    return res;
 }
 
-export async function listarGastos(mes: string, ano: number) {
+export async function listarGastos(mes: string, ano: string) {
    const dados = await apiGet<Gasto[]>({
       acao: 'listarGastos',
       mes,
@@ -37,7 +37,7 @@ export async function excluirGasto(rowIndex: number, mes: string, ano: string) {
 export async function atualizarGasto(payload: {
    rowIndex: number;
    valor: number;
-}, mes: string, ano: string) {
+}) {
    const res = await apiPost({
       acao: 'atualizarGasto',
       ...payload

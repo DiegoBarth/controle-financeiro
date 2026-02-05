@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { atualizarGasto, excluirGasto } from '@/api/endpoints/gastos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Gasto } from '@/types/Gasto'
 import { numeroParaMoeda, moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
+import { useGastos } from '@/hooks/useGastos'
 
 interface Props {
    aberto: boolean
@@ -14,7 +13,7 @@ interface Props {
 
 export function ModalEditarGasto({ aberto, gasto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
+   const { atualizar, excluir, isSalvando, isExcluindo } = useGastos(mes, String(ano))
 
    const [valor, setValor] = useState('')
 
@@ -24,38 +23,22 @@ export function ModalEditarGasto({ aberto, gasto, onClose }: Props) {
       }
    }, [gasto])
 
-   const atualizarMutation = useMutation({
-      mutationFn: () =>
-         atualizarGasto(
-            { rowIndex: gasto!.rowIndex, valor: moedaParaNumero(valor) },
-            mes,
-            String(ano)
-         ),
-      onSuccess: () => {
-         queryClient.setQueryData<Gasto[]>(
-            ['gastos', mes, ano],
-            old =>
-               old?.map(g =>
-                  g.rowIndex === gasto!.rowIndex
-                     ? { ...g, valor: moedaParaNumero(valor) }
-                     : g
-               ) ?? []
-         )
-         onClose()
-      }
-   })
+   const handleAtualizar = async () => {
+      await atualizar({
+         rowIndex: gasto!.rowIndex,
+         valor: moedaParaNumero(valor)
+      })
+      setValor('')
 
-   const excluirMutation = useMutation({
-      mutationFn: () =>
-         excluirGasto(gasto!.rowIndex, mes, String(ano)),
-      onSuccess: () => {
-         queryClient.setQueryData<Gasto[]>(
-            ['gastos', mes, ano],
-            old => old?.filter(g => g.rowIndex !== gasto!.rowIndex) ?? []
-         )
-         onClose()
-      }
-   })
+      onClose()
+   }
+
+   const handleExcluir = async () => {
+      await excluir(gasto!.rowIndex)
+      setValor('')
+
+      onClose()
+   }
 
    if (!gasto) return null
 
@@ -65,9 +48,10 @@ export function ModalEditarGasto({ aberto, gasto, onClose }: Props) {
          onClose={onClose}
          titulo={gasto.descricao}
          tipo="edicao"
-         loading={atualizarMutation.isPending || excluirMutation.isPending}
-         onSalvar={() => atualizarMutation.mutate()}
-         onExcluir={() => excluirMutation.mutate()}
+         loading={isSalvando || isExcluindo}
+         loadingTexto={(isSalvando ? 'Salvando...' : 'Excluindo...')}
+         onSalvar={() => handleAtualizar()}
+         onExcluir={() => handleExcluir()}
       >
          <div className="space-y-3">
             <div>

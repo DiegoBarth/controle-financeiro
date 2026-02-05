@@ -5,20 +5,16 @@ import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { ProgressoReceitasDespesas } from '../components/dashboard/ProgressoReceitasDespesas'
 import { SaldoAno } from '../components/dashboard/SaldoAno'
 import { TopCategorias } from '../components/dashboard/TopCategorias'
-import { useDashboard } from '../contexts/DashboardContext'
+import { useDashboard } from '@/hooks/useDashboard'
+import { usePeriodo } from '@/contexts/PeriodoContext'
 
 export function Dashboard() {
-   const {
-      saldoAno,
-      topCategorias,
-      cartoes,
-      resumo,
-      loading,
-   } = useDashboard()
+   const { mes, ano, resumo } = usePeriodo();
+   const { dashboard, isLoading } = useDashboard(mes, String(ano))
 
    const navigate = useNavigate()
 
-   if (loading) {
+   if (isLoading) {
       return (
          <div className="mx-auto max-w-5xl p-4">
             <DashboardSkeleton />
@@ -44,17 +40,17 @@ export function Dashboard() {
 
          {/* Cartões ficam por último */}
          <Cartoes
-            cartoes={cartoes}
+            cartoes={dashboard.resumoCartoes}
          />
 
          {/* Grid principal */}
          <div className="grid gap-6 md:grid-cols-2">
             <SaldoAno
-               data={saldoAno}
+               data={dashboard.saldoMensal}
             />
 
             <TopCategorias
-               categorias={topCategorias}
+               categorias={dashboard.topCategorias}
             />
          </div>
 
