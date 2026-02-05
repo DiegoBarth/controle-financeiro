@@ -14,7 +14,6 @@ export function Compromissos() {
    const [compromissoSelecionado, setCompromissoSelecionado] =
       useState<Compromisso | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
-
    const navigate = useNavigate()
 
    const { data: compromissos = [], isLoading } = useQuery({
