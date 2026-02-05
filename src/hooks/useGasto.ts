@@ -4,11 +4,11 @@ import {
    criarGasto,
    atualizarGasto,
    excluirGasto
-} from '@/api/endpoints/gastos'
+} from '@/api/endpoints/gasto'
 import type { Gasto } from '@/types/Gasto'
 import { useLocation } from 'react-router-dom'
 
-export function useGastos(mes: string, ano: string) {
+export function useGasto(mes: string, ano: string) {
    const queryClient = useQueryClient()
    const queryKey = ['gastos', mes, ano]
 

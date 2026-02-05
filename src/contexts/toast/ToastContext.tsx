@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import ToastContainer from './ToastContainer';
+import ToastContainer from '@/contexts/toast/ToastContainer';
 
 interface Toast {
    id: string;

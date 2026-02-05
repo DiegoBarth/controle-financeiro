@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { ResumoCompleto } from '../types/ResumoCompleto';
+import type { ResumoCompleto } from '@/types/ResumoCompleto';
 import { useResumo } from '@/hooks/useResumo';
 
 interface PeriodoContextType {

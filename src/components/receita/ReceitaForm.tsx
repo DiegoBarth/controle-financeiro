@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { criarReceita } from '@/api/endpoints/receitas';
+import { criarReceita } from '@/api/endpoints/receita';
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores';
 
 interface Props {

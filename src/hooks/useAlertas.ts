@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { usePeriodo } from '../contexts/PeriodoContext';
-import { useCompromissos } from './useCompromissos';
+import { usePeriodo } from '@/contexts/PeriodoContext';
+import { useCompromisso } from '@/hooks/useCompromisso';
 
 function zerarHora(d: Date) {
    const copy = new Date(d);
@@ -10,7 +10,7 @@ function zerarHora(d: Date) {
 
 export function useAlertas() {
    const { ano } = usePeriodo();
-   const { compromissos } = useCompromissos('all', String(ano), 'alertas')
+   const { compromissos } = useCompromisso('all', String(ano), 'alertas')
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());

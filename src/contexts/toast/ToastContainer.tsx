@@ -1,5 +1,5 @@
-import { Toast } from './ToastContext';
-import { ToastItem } from './ToastItem';
+import { Toast } from '@/contexts/toast/ToastContext';
+import { ToastItem } from '@/contexts/toast/ToastItem';
 
 interface ToastContainerProps {
    toasts: Toast[];

@@ -1,5 +1,5 @@
-import type { Categoria } from '../../types/Dashboard'
-import { numeroParaMoeda } from '../../utils/formatadores'
+import type { Categoria } from '@/types/Dashboard'
+import { numeroParaMoeda } from '@/utils/formatadores'
 
 interface TopCategoriasProps {
    categorias: Categoria[]

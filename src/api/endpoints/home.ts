@@ -2,7 +2,7 @@ import type { Compromisso } from '@/types/Compromisso';
 import type { Gasto } from '@/types/Gasto';
 import type { Receita } from '@/types/Receita';
 import type { ResumoCompleto } from '@/types/ResumoCompleto';
-import { apiGet } from '../client';
+import { apiGet } from '@/api/client';
 
 export interface Teste {
    compromissos: Compromisso[];

@@ -1,6 +1,7 @@
-import { useState, TouchEvent, MouseEvent } from 'react'
-import type { Cartao } from '../../types/Dashboard'
-import { numeroParaMoeda } from '../../utils/formatadores'
+import { useState } from 'react'
+import type { Cartao } from '@/types/Dashboard'
+import { numeroParaMoeda } from '@/utils/formatadores'
+import { BASE_PATH } from '@/config/constants'
 
 interface Props {
    cartoes: Cartao[]
@@ -103,7 +104,7 @@ export function Cartoes({ cartoes }: Props) {
                   onClick={() => !isDragging && setAtivo(index)}
                >
                   <img
-                     src={`${import.meta.env.BASE_URL}cartoes/${c.imagem}.jpg`}
+                     src={`${BASE_PATH}cartoes/${c.imagem}.jpg`}
                      alt={c.cartao}
                      className="mb-3 h-44 w-full rounded-lg object-cover pointer-events-none"
                   />

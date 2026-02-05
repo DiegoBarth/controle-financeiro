@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
-import { ModalBase } from '../ui/ModalBase'
-import { SelectCustomizado } from '../ui/SelectCustomizado'
+import { ModalBase } from '@/components/ui/ModalBase'
+import { SelectCustomizado } from '@/components/ui/SelectCustomizado'
 import { usePeriodo } from '@/contexts/PeriodoContext'
-import { useGastos } from '@/hooks/useGastos'
+import { useGasto } from '@/hooks/useGasto'
 
 interface Props {
    aberto: boolean
@@ -12,7 +12,7 @@ interface Props {
 
 export function ModalNovoGasto({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const { criar, isSalvando } = useGastos(mes, String(ano))
+   const { criar, isSalvando } = useGasto(mes, String(ano))
 
    const [descricao, setDescricao] = useState('')
    const [dataPagamento, setDataPagamento] = useState('')

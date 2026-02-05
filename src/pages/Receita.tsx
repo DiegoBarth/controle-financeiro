@@ -6,11 +6,11 @@ import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { ModalEditarReceita } from '@/components/receita/ModalEditarReceita'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Receita } from '@/types/Receita'
-import { useReceitas } from '@/hooks/useReceitas'
+import { useReceita } from '@/hooks/useReceita'
 
-export function Receitas() {
+export function Receita() {
    const { mes, ano } = usePeriodo()
-   const { receitas, isLoading } = useReceitas(mes, String(ano))
+   const { receitas, isLoading } = useReceita(mes, String(ano))
    const navigate = useNavigate()
 
    const [receitaSelecionada, setReceitaSelecionada] = useState<Receita | null>(null)

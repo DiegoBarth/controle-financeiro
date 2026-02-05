@@ -1,5 +1,5 @@
-import type { Receita } from '../../types/Receita'
-import { numeroParaMoeda } from '../../utils/formatadores'
+import type { Receita } from '@/types/Receita'
+import { numeroParaMoeda } from '@/utils/formatadores'
 
 interface Props {
    receitas: Receita[]
