@@ -1,26 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { listarCompromissos } from '@/api/endpoints/compromissos'
 import { CompromissoLista } from '@/components/compromissos/CompromissoLista'
 import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCompromisso'
 import { ModalNovoCompromisso } from '@/components/compromissos/ModalNovoCompromisso'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
+import { useCompromissos } from '@/hooks/useCompromissos'
 
 export function Compromissos() {
    const { mes, ano } = usePeriodo()
+   const { compromissos, isLoading } = useCompromissos(mes, String(ano))
    const [compromissoSelecionado, setCompromissoSelecionado] =
       useState<Compromisso | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
    const navigate = useNavigate()
-
-   const { data: compromissos = [], isLoading } = useQuery({
-      queryKey: ['compromissos', mes, ano],
-      queryFn: () => listarCompromissos(mes, String(ano)),
-      staleTime: Infinity
-   })
 
    if (isLoading) {
       return (
@@ -65,7 +59,7 @@ export function Compromissos() {
             aberto={!!compromissoSelecionado}
             compromisso={compromissoSelecionado}
             onClose={() => setCompromissoSelecionado(null)}
-            onConfirmar={()=> {}}
+            onConfirmar={() => { }}
          />
       </div>
    )

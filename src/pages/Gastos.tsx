@@ -1,26 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { listarGastos } from '@/api/endpoints/gastos'
 import { GastoLista } from '@/components/gastos/GastoLista'
 import { ModalNovoGasto } from '@/components/gastos/ModalNovoGasto'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { ModalEditarGasto } from '@/components/gastos/ModalEditarGasto'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Gasto } from '@/types/Gasto'
+import { useGastos } from '@/hooks/useGastos'
 
 export function Gastos() {
    const { mes, ano } = usePeriodo()
+   const { gastos, isLoading } = useGastos(mes, String(ano))
    const navigate = useNavigate()
 
    const [gastoSelecionado, setGastoSelecionado] = useState<Gasto | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
-
-   const { data: gastos = [], isLoading, isFetching } = useQuery({
-      queryKey: ['gastos', mes, ano],
-      queryFn: () => listarGastos(mes, ano),
-      placeholderData: previous => previous ?? []
-   })
 
    if (isLoading) {
       return (
@@ -50,8 +44,6 @@ export function Gastos() {
          </div>
 
          <h2 className="text-lg font-semibold mb-2">Gastos</h2>
-
-         {isFetching && gastos.length === 0 && <SkeletonLista />}
 
          <GastoLista
             gastos={gastos}

@@ -4,7 +4,7 @@ import { formatarDataBR } from '@/utils/formatadores';
 
 export async function criarReceita(payload: {
    dataPrevista: string;
-   dataRecebimento: string;
+   dataRecebimento?: string | null;
    descricao: string;
    valor: number;
 }) {
@@ -38,8 +38,8 @@ export async function excluirReceita(rowIndex: number, mes: string, ano: string)
 export async function atualizarReceita(payload: {
    rowIndex: number;
    valor: number;
-   dataRecebimento: string;
-}, mes: string, ano: string) {
+   dataRecebimento?: string | null;
+}) {
    const res = await apiPost({
       acao: 'atualizarReceita',
       ...payload

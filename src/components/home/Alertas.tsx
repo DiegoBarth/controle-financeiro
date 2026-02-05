@@ -1,4 +1,4 @@
-import { useAlertas } from "@/contexts/UseAlertas"
+import { useAlertas } from "@/hooks/useAlertas"
 import type { Compromisso } from "@/types/Compromisso"
 
 interface AlertaCardProps {
@@ -45,7 +45,6 @@ export function Alertas() {
    const [removidos, setRemovidos] = useState<number[]>([])
    const [tipoOrigem, setTipoOrigem] =
       useState<"vencido" | "hoje" | "semana" | null>(null)
-
 
    function voltarParaLista() {
       if (tipoOrigem === "vencido" && jaVencidos.length > 0) {

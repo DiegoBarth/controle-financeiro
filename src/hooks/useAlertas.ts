@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { listarCompromissos } from '@/api/endpoints/compromissos';
-import { usePeriodo } from './PeriodoContext';
+import { usePeriodo } from '../contexts/PeriodoContext';
+import { useCompromissos } from './useCompromissos';
 
 function zerarHora(d: Date) {
    const copy = new Date(d);
@@ -10,12 +9,8 @@ function zerarHora(d: Date) {
 }
 
 export function useAlertas() {
-   const { mes, ano } = usePeriodo();
-   const { data: compromissos = [] } = useQuery({
-      queryKey: ['compromissos', 'alertas', ano],
-      queryFn: () => listarCompromissos('all', String(ano)),
-      placeholderData: previous => previous ?? []
-   });
+   const { ano } = usePeriodo();
+   const { compromissos } = useCompromissos('all', String(ano), 'alertas')
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());

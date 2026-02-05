@@ -1,13 +1,11 @@
-import { useState } from 'react'
-import { criarReceita } from '@/api/endpoints/receitas'
+import { useState, useEffect } from 'react'
 import { usePeriodo } from '@/contexts/PeriodoContext'
-import type { Receita } from '@/types/Receita'
 import {
    formatarMoeda,
    moedaParaNumero
 } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useReceitas } from '@/hooks/useReceitas'
 
 interface Props {
    aberto: boolean
@@ -16,38 +14,35 @@ interface Props {
 
 export function ModalNovaReceita({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
-
+   const { criar, isSalvando } = useReceitas(mes, String(ano))
    const [descricao, setDescricao] = useState('')
    const [valor, setValor] = useState('')
    const [dataPrevista, setDataPrevista] = useState('')
    const [dataRecebimento, setDataRecebimento] = useState('')
 
-   const criarMutation = useMutation({
-      mutationFn: () =>
-         criarReceita(
-            {
-               descricao,
-               valor: moedaParaNumero(valor),
-               dataPrevista,
-               dataRecebimento
-            }
-         ),
-      onSuccess: (novaReceita: Receita) => {
-         queryClient.setQueryData<Receita[]>(
-            ['receitas', mes, ano],
-            old => old ? [...old, novaReceita] : [novaReceita]
-         )
-
-         // limpa formulário
+   useEffect(() => {
+      if (!aberto) {
          setDescricao('')
          setValor('')
          setDataPrevista('')
          setDataRecebimento('')
-
-         onClose()
       }
-   })
+   }, [aberto])
+
+   const handleSalvar = async () => {
+      await criar({
+         descricao,
+         valor: moedaParaNumero(valor),
+         dataPrevista,
+         dataRecebimento: dataRecebimento || ''
+      })
+      setDescricao('')
+      setValor('')
+      setDataPrevista('')
+      setDataRecebimento('')
+
+      onClose()
+   }
 
    return (
       <ModalBase
@@ -55,9 +50,9 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
          onClose={onClose}
          titulo="Nova receita"
          tipo="inclusao"
-         loading={criarMutation.isPending}
+         loading={isSalvando}
          loadingTexto="Salvando..."
-         onSalvar={() => criarMutation.mutate()}
+         onSalvar={() => handleSalvar()}
       >
          <div className="space-y-3">
             <div>

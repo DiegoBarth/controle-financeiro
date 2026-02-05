@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react'
-import { atualizarCompromisso, excluirCompromisso } from '@/api/endpoints/compromissos'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
 import {
-   formatarDataBR,
    formatarMoeda,
    moedaParaNumero,
    numeroParaMoeda
 } from '@/utils/formatadores'
 import { ModalBase } from '../ui/ModalBase'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCompromissos } from '@/hooks/useCompromissos'
 
 interface Props {
    aberto: boolean
@@ -18,15 +16,9 @@ interface Props {
    onConfirmar: (rowIndex: number) => void
 }
 
-export function ModalEditarCompromisso({
-   aberto,
-   compromisso,
-   onClose,
-   onConfirmar
-}: Props) {
+export function ModalEditarCompromisso({ aberto, compromisso, onClose, onConfirmar }: Props) {
    const { mes, ano } = usePeriodo()
-   const queryClient = useQueryClient()
-
+   const { atualizar, excluir, isSalvando, isExcluindo } = useCompromissos(mes, String(ano))
    const [valor, setValor] = useState('')
    const [dataPagamento, setDataPagamento] = useState('')
 
@@ -37,71 +29,30 @@ export function ModalEditarCompromisso({
       }
    }, [compromisso])
 
-   const atualizarMutation = useMutation({
-      mutationFn: () =>
-         atualizarCompromisso(
-            {
-               rowIndex: compromisso!.rowIndex,
-               valor: moedaParaNumero(valor),
-               dataPagamento
-            },
-            mes,
-            String(ano)
-         ),
-      onSuccess: () => {
-         queryClient.setQueryData<Compromisso[]>(
-            ['compromissos', mes, ano],
-            old =>
-               old?.map(c =>
-                  c.rowIndex === compromisso!.rowIndex
-                     ? {
-                        ...c,
-                        valor: moedaParaNumero(valor),
-                        dataPagamento
-                     }
-                     : c
-               ) ?? []
-         )
+   const handleAtualizar = async () => {
+      await atualizar({
+         rowIndex: compromisso!.rowIndex,
+         valor: moedaParaNumero(valor),
+         dataPagamento,
+         scope: 'single'
+      })
+      setValor('')
+      setDataPagamento('')
 
-         queryClient.setQueryData<Compromisso[]>(
-            ['compromissos', 'alertas', ano],
-            old =>
-               old?.map(c =>
-                  c.rowIndex === compromisso!.rowIndex
-                     ? { ...c, dataPagamento: formatarDataBR(dataPagamento) }
-                     : c
-               ) ?? []
-         );
-
-         if (compromisso) {
-            onConfirmar(compromisso.rowIndex)
-         }
-         onClose()
+      if (compromisso) {
+         onConfirmar(compromisso.rowIndex)
       }
-   })
+      onClose()
+   }
 
-   const excluirMutation = useMutation({
-      mutationFn: () =>
-         excluirCompromisso(compromisso!.rowIndex, mes, String(ano)),
-      onSuccess: () => {
-         queryClient.setQueryData<Compromisso[]>(
-            ['compromissos', mes, ano],
-            old =>
-               old?.filter(c => c.rowIndex !== compromisso!.rowIndex) ?? []
-         )
+   const handleExcluir = async () => {
+      await excluir(compromisso!.rowIndex)
 
-         queryClient.setQueryData<Compromisso[]>(
-            ['compromissos', 'alertas', ano],
-            old =>
-               old?.filter(c => c.rowIndex !== compromisso!.rowIndex) ?? []
-         )
-
-         if (compromisso) {
-            onConfirmar(compromisso.rowIndex)
-         }
-         onClose()
+      if (compromisso) {
+         onConfirmar(compromisso.rowIndex)
       }
-   })
+      onClose()
+   }
 
    if (!compromisso) return null
 
@@ -111,9 +62,10 @@ export function ModalEditarCompromisso({
          onClose={onClose}
          titulo={compromisso.descricao}
          tipo="edicao"
-         loading={atualizarMutation.isPending || excluirMutation.isPending}
-         onSalvar={() => atualizarMutation.mutate()}
-         onExcluir={() => excluirMutation.mutate()}
+         loading={isSalvando || isExcluindo}
+         loadingTexto={(isSalvando ? 'Salvando...' : 'Excluindo...')}
+         onSalvar={() => handleAtualizar()}
+         onExcluir={() => handleExcluir()}
       >
          <div className="space-y-3">
             <div>
