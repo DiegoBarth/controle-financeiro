@@ -1,5 +1,5 @@
-import type { ResumoCompleto } from '../../types/ResumoCompleto'
-import { numeroParaMoeda } from '../../utils/formatadores'
+import type { ResumoCompleto } from '@/types/ResumoCompleto'
+import { numeroParaMoeda } from '@/utils/formatadores'
 
 interface Props {
    resumo: ResumoCompleto | null

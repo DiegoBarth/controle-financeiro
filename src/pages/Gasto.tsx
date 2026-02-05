@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GastoLista } from '@/components/gastos/GastoLista'
-import { ModalNovoGasto } from '@/components/gastos/ModalNovoGasto'
+import { GastoLista } from '@/components/gasto/GastoLista'
+import { ModalNovoGasto } from '@/components/gasto/ModalNovoGasto'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
-import { ModalEditarGasto } from '@/components/gastos/ModalEditarGasto'
+import { ModalEditarGasto } from '@/components/gasto/ModalEditarGasto'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Gasto } from '@/types/Gasto'
-import { useGastos } from '@/hooks/useGastos'
+import { useGasto } from '@/hooks/useGasto'
 
-export function Gastos() {
+export function Gasto() {
    const { mes, ano } = usePeriodo()
-   const { gastos, isLoading } = useGastos(mes, String(ano))
+   const { gastos, isLoading } = useGasto(mes, String(ano))
    const navigate = useNavigate()
 
    const [gastoSelecionado, setGastoSelecionado] = useState<Gasto | null>(null)

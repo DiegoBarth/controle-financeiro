@@ -1,5 +1,5 @@
-import { numeroParaMoeda } from "../../utils/formatadores"
-import { Skeleton } from "../ui/Skeleton"
+import { numeroParaMoeda } from "@/utils/formatadores"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 interface ResumoCardProps {
    titulo: string

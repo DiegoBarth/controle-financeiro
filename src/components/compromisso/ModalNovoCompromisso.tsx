@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
-import { ModalBase } from '../ui/ModalBase'
-import { SelectCustomizado } from '../ui/SelectCustomizado'
+import { ModalBase } from '@/components/ui/ModalBase'
+import { SelectCustomizado } from '@/components/ui/SelectCustomizado'
 
 import { usePeriodo } from '@/contexts/PeriodoContext'
-import { useCompromissos } from '@/hooks/useCompromissos'
+import { useCompromisso } from '@/hooks/useCompromisso'
 
 interface Props {
    aberto: boolean
@@ -25,7 +25,7 @@ const cartoes = ['Bradesco', 'Itaú', 'Mercado Pago']
 
 export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const { criar, criarCartao, isSalvando } = useCompromissos(mes, String(ano))
+   const { criar, criarCartao, isSalvando } = useCompromisso(mes, String(ano))
 
    const [descricao, setDescricao] = useState('')
    const [categoria, setCategoria] = useState('')

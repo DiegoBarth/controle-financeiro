@@ -7,8 +7,8 @@ import {
    dataBRParaISO,
    formatarMoeda
 } from '@/utils/formatadores'
-import { ModalBase } from '../ui/ModalBase'
-import { useReceitas } from '@/hooks/useReceitas'
+import { ModalBase } from '@/components/ui/ModalBase'
+import { useReceita } from '@/hooks/useReceita'
 
 interface Props {
    aberto: boolean
@@ -18,7 +18,7 @@ interface Props {
 
 export function ModalEditarReceita({ aberto, receita, onClose }: Props) {
    const { mes, ano } = usePeriodo()
-   const { atualizar, excluir, isSalvando, isExcluindo } = useReceitas(mes, String(ano))
+   const { atualizar, excluir, isSalvando, isExcluindo } = useReceita(mes, String(ano))
 
    const [valor, setValor] = useState('')
    const [dataRecebimento, setDataRecebimento] = useState('')

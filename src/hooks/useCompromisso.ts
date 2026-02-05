@@ -5,12 +5,12 @@ import {
    criarCartao,
    atualizarCompromisso,
    excluirCompromisso
-} from '@/api/endpoints/compromissos'
+} from '@/api/endpoints/compromisso'
 import type { Compromisso } from '@/types/Compromisso'
 import { dataBRParaISO } from '@/utils/formatadores'
 import { useLocation } from 'react-router-dom'
 
-export function useCompromissos(mes: string, ano: string, chave?: string | null) {
+export function useCompromisso(mes: string, ano: string, chave?: string | null) {
    const queryClient = useQueryClient()
    const queryKey = ['compromissos', chave ?? mes, ano]
    const location = useLocation();

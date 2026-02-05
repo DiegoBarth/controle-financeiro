@@ -1,33 +1,14 @@
-import { GoogleLogin, googleLogout } from "@react-oauth/google";
+import { GoogleLogin, googleLogout, type CredentialResponse } from "@react-oauth/google";
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
 import { useToast } from '@/contexts/toast';
-import { verificarEmailPossuiAutorizacao } from "./api/endpoints/home";
-import { Compromissos } from "./pages/Compromissos";
-import { Dashboard } from "./pages/Dashboard";
-import { Gastos } from "./pages/Gastos";
-import { Home } from "./pages/Home";
-import { Receitas } from "./pages/Receitas";
-import { PeriodoProvider } from "./contexts/PeriodoContext";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
-const AUTH_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 dias
+import { verificarEmailPossuiAutorizacao } from "@/api/endpoints/home";
+import { AppProvider, createQueryClient } from "@/contexts/AppProvider";
+import { AppRouter } from "@/AppRouter";
+import { AUTH_TIMEOUT_MS, AUTH_REFRESH_INTERVAL_MS } from "@/config/constants";
 
 function App() {
    const toast = useToast();
-   const [queryClient] = useState(
-      () =>
-         new QueryClient({
-            defaultOptions: {
-               queries: {
-                  staleTime: 1000 * 60 * 5,
-                  refetchOnWindowFocus: false,
-                  refetchOnReconnect: false
-               }
-            }
-         })
-   );
+   const [queryClient] = useState(createQueryClient);
 
    const [userEmail, setUserEmail] = useState<string | null>(() => {
       const saved = localStorage.getItem("user_email");
@@ -35,7 +16,7 @@ function App() {
 
       if (!saved || !savedTime) return null;
 
-      if (Date.now() - savedTime > AUTH_TIMEOUT) {
+      if (Date.now() - savedTime > AUTH_TIMEOUT_MS) {
          localStorage.removeItem("user_email");
          localStorage.removeItem("login_time");
          return null;
@@ -44,8 +25,9 @@ function App() {
       return saved;
    });
 
-   async function handleLoginSuccess(credentialResponse: any) {
+   async function handleLoginSuccess(credentialResponse: CredentialResponse) {
       try {
+         if (!credentialResponse.credential) return;
          const decoded = JSON.parse(
             atob(credentialResponse.credential.split(".")[1])
          );
@@ -80,7 +62,7 @@ function App() {
          if (userEmail) {
             localStorage.setItem("login_time", Date.now().toString());
          }
-      }, 5 * 60 * 1000); // 5 minutos
+      }, AUTH_REFRESH_INTERVAL_MS);
 
       return () => clearInterval(interval);
    }, [userEmail]);
@@ -111,21 +93,9 @@ function App() {
    }
 
    return (
-      <>
-         <QueryClientProvider client={queryClient}>
-            <PeriodoProvider>
-                  <Routes>
-                     <Route path="/" element={<Home onLogout={() => handleLogout()} />} />
-                     <Route path="/gastos" element={<Gastos />} />
-                     <Route path="/compromissos" element={<Compromissos />} />
-                     <Route path="/receitas" element={<Receitas />} />
-                     <Route path="/dashboard" element={<Dashboard />} />
-                     <Route path="*" element={<Navigate to="/" />} />
-                  </Routes>
-            </PeriodoProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
-         </QueryClientProvider>
-      </>
+      <AppProvider client={queryClient}>
+         <AppRouter onLogout={handleLogout} />
+      </AppProvider>
    );
 }
 

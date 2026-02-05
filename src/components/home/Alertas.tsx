@@ -35,8 +35,8 @@ function AlertaCard({ titulo, gradientFrom, gradientTo, onClick }: AlertaCardPro
 }
 
 import { useState } from "react"
-import { ModalEditarCompromisso } from "../compromissos/ModalEditarCompromisso"
-import { ModalCompromissos } from "./ModalCompromissos"
+import { ModalEditarCompromisso } from "@/components/compromisso/ModalEditarCompromisso"
+import { ModalCompromissos } from "@/components/home/ModalCompromissos"
 
 export function Alertas() {
    const { vencidos, hoje, semana } = useAlertas()

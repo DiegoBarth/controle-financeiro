@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 
-import { Cartoes } from '../components/dashboard/Cartoes'
-import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
-import { ProgressoReceitasDespesas } from '../components/dashboard/ProgressoReceitasDespesas'
-import { SaldoAno } from '../components/dashboard/SaldoAno'
-import { TopCategorias } from '../components/dashboard/TopCategorias'
+import { Cartoes } from '@/components/dashboard/Cartoes'
+import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
+import { ProgressoReceitasDespesas } from '@/components/dashboard/ProgressoReceitasDespesas'
+import { SaldoAno } from '@/components/dashboard/SaldoAno'
+import { TopCategorias } from '@/components/dashboard/TopCategorias'
 import { useDashboard } from '@/hooks/useDashboard'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 

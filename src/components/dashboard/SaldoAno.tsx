@@ -7,7 +7,7 @@ import {
    ResponsiveContainer,
    CartesianGrid,
 } from 'recharts'
-import type { SaldoMensal } from '../../types/Dashboard'
+import type { SaldoMensal } from '@/types/Dashboard'
 
 interface SaldoAnoProps {
    data: SaldoMensal[]

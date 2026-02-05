@@ -7,7 +7,7 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { usePeriodo } from "@/contexts/PeriodoContext"
-import { Skeleton } from "../ui/Skeleton"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 interface FiltrosPeriodoProps {
    mes: string

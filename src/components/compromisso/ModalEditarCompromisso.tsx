@@ -6,8 +6,8 @@ import {
    moedaParaNumero,
    numeroParaMoeda
 } from '@/utils/formatadores'
-import { ModalBase } from '../ui/ModalBase'
-import { useCompromissos } from '@/hooks/useCompromissos'
+import { ModalBase } from '@/components/ui/ModalBase'
+import { useCompromisso } from '@/hooks/useCompromisso'
 
 interface Props {
    aberto: boolean
@@ -18,7 +18,7 @@ interface Props {
 
 export function ModalEditarCompromisso({ aberto, compromisso, onClose, onConfirmar }: Props) {
    const { mes, ano } = usePeriodo()
-   const { atualizar, excluir, isSalvando, isExcluindo } = useCompromissos(mes, String(ano))
+   const { atualizar, excluir, isSalvando, isExcluindo } = useCompromisso(mes, String(ano))
    const [valor, setValor] = useState('')
    const [dataPagamento, setDataPagamento] = useState('')
 

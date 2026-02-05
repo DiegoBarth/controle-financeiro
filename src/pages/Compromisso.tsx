@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CompromissoLista } from '@/components/compromissos/CompromissoLista'
-import { ModalEditarCompromisso } from '@/components/compromissos/ModalEditarCompromisso'
-import { ModalNovoCompromisso } from '@/components/compromissos/ModalNovoCompromisso'
+import { CompromissoLista } from '@/components/compromisso/CompromissoLista'
+import { ModalEditarCompromisso } from '@/components/compromisso/ModalEditarCompromisso'
+import { ModalNovoCompromisso } from '@/components/compromisso/ModalNovoCompromisso'
 import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
-import { useCompromissos } from '@/hooks/useCompromissos'
+import { useCompromisso } from '@/hooks/useCompromisso'
 
-export function Compromissos() {
+export function Compromisso() {
    const { mes, ano } = usePeriodo()
-   const { compromissos, isLoading } = useCompromissos(mes, String(ano))
+   const { compromissos, isLoading } = useCompromisso(mes, String(ano))
    const [compromissoSelecionado, setCompromissoSelecionado] =
       useState<Compromisso | null>(null)
    const [modalAberto, setModalAberto] = useState(false)

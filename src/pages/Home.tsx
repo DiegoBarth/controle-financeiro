@@ -1,8 +1,8 @@
-import { AcoesRapidas } from "../components/home/AcoesRapidas"
-import { Alertas } from "../components/home/Alertas"
-import { FiltrosPeriodo } from "../components/home/FiltrosPeriodo"
-import { ResumoMes } from "../components/home/ResumoMes"
-import { usePeriodo } from '../contexts/PeriodoContext';
+import { AcoesRapidas } from "@/components/home/AcoesRapidas"
+import { Alertas } from "@/components/home/Alertas"
+import { FiltrosPeriodo } from "@/components/home/FiltrosPeriodo"
+import { ResumoMes } from "@/components/home/ResumoMes"
+import { usePeriodo } from '@/contexts/PeriodoContext';
 
 interface Props {
    onLogout: () => void

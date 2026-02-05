@@ -1,6 +1,6 @@
 import { Plus, Minus, Calendar, Wallet, TrendingUp } from "lucide-react"
-import { usePeriodo } from '../../contexts/PeriodoContext';
-import { ResumoCard } from "./ResumoCard"
+import { usePeriodo } from '@/contexts/PeriodoContext';
+import { ResumoCard } from "@/components/home/ResumoCard"
 
 export function ResumoMes() {
    const { resumo, isLoading } = usePeriodo();

@@ -4,12 +4,12 @@ import {
    criarReceita,
    atualizarReceita,
    excluirReceita
-} from '@/api/endpoints/receitas'
+} from '@/api/endpoints/receita'
 
 import { useLocation } from 'react-router-dom';
 import type { Receita } from '@/types/Receita'
 
-export function useReceitas(mes: string, ano: string) {
+export function useReceita(mes: string, ano: string) {
    const queryClient = useQueryClient()
    const queryKey = ['receitas', mes, ano]
    const location = useLocation();
