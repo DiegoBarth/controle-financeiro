@@ -62,7 +62,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
       }
    }, [aberto])
 
-   function handleSalvar() {
+   async function handleSalvar() {
       if (!descricao || !categoria || !tipo) {
          alert('Preencha os campos obrigatórios')
          return
@@ -74,7 +74,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             return
          }
 
-         criarCartao({
+         await criarCartao({
             tipo: 'Cartão',
             descricao,
             categoria,
@@ -89,7 +89,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             return
          }
 
-         criar({
+         await criar({
             tipo,
             descricao,
             categoria,
@@ -119,8 +119,9 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          onClose={onClose}
          titulo="Novo compromisso"
          tipo="inclusao"
-         onSalvar={handleSalvar}
          loading={isSalvando}
+         loadingTexto="Salvando..."
+         onSalvar={() => handleSalvar()}
       >
          <div className="space-y-3">
             {/* Descrição */}

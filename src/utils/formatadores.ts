@@ -41,3 +41,19 @@ export function formatarDataBR(data: string | Date): string {
 
    return `${dia}/${mes}/${ano}`;
 }
+
+export function getMesAno(dataISOouBR: string) {
+   let data: Date
+
+   if (dataISOouBR.includes('/')) {
+      const [dia, mes, ano] = dataISOouBR.split('/').map(Number)
+      data = new Date(ano, mes - 1, dia)
+   } else {
+      data = new Date(dataISOouBR)
+   }
+
+   const mes = String(data.getMonth() + 1)
+   const ano = String(data.getFullYear())
+
+   return { mes, ano }
+}

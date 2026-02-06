@@ -7,7 +7,7 @@ import {
    excluirCompromisso
 } from '@/api/endpoints/compromisso'
 import type { Compromisso } from '@/types/Compromisso'
-import { dataBRParaISO } from '@/utils/formatadores'
+import { dataBRParaISO, getMesAno } from '@/utils/formatadores'
 import { useLocation } from 'react-router-dom'
 
 export function useCompromisso(mes: string, ano: string, chave?: string | null) {
@@ -35,22 +35,17 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
          meses?: number
       }) =>
          criarCompromisso(novoCompromisso),
-      onSuccess: (novoCompromisso: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            queryKey,
-            old => old ? [...old, novoCompromisso] : [novoCompromisso]
-         )
+      onSuccess: (registrosCriados: Compromisso[]) => {
+         inserirNoCache(registrosCriados)
       }
    })
 
    const criarCartaoMutation = useMutation({
       mutationFn: (novoCompromisso: Omit<Compromisso, 'rowIndex'>) =>
          criarCartao(novoCompromisso),
-      onSuccess: (novoCompromisso: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            queryKey,
-            old => old ? [...old, novoCompromisso] : [novoCompromisso]
-         )
+
+      onSuccess: (registrosCriados: Compromisso[]) => {
+         inserirNoCache(registrosCriados)
       }
    })
 
@@ -108,6 +103,21 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
          )
       }
    })
+
+   function inserirNoCache(registros: Compromisso[]) {
+      registros.forEach(registro => {
+         const { mes, ano } = getMesAno(registro.dataVencimento)
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', mes, ano],
+            old => old ? [...old, registro] : [registro]
+         )
+
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', 'alertas', ano],
+            old => old ? [...old, registro] : [registro]
+         )
+      })
+   }
 
    return {
       compromissos,
