@@ -1,5 +1,13 @@
+import { ListLayout } from '@/components/layout/ListLayout'
+import { ListItemLayout } from '@/components/layout/ListItemLayout'
 import type { Receita } from '@/types/Receita'
 import { numeroParaMoeda } from '@/utils/formatadores'
+import { ListItemHeaderMobile } from '@/components/layout/ListItemHeaderMobile'
+import { ListItemFooterMobile } from '@/components/layout/ListItemFooterMobile'
+import { ListColDescription } from '@/components/layout/ListColDescription'
+import { ListColMuted } from '@/components/layout/ListColMuted'
+import { ListColValue } from '@/components/layout/ListColValue'
+import { ListItemRowDesktop } from '@/components/layout/ListItemRowDesktop'
 
 interface Props {
    receitas: Receita[]
@@ -7,100 +15,74 @@ interface Props {
 }
 
 export function ReceitaLista({ receitas, onSelect }: Props) {
-   if (receitas.length === 0) {
-      return (
-         <p className="text-sm text-muted-foreground">
-            Nenhuma receita cadastrada
-         </p>
-      )
-   }
-
    return (
-      <>
-         {/* MOBILE */}
-         <div className="space-y-2 sm:hidden">
-            {receitas.map(r => {
-               const recebida = !!r.dataRecebimento
+      <ListLayout
+         itens={receitas}
+         vazioTexto="Nenhuma receita cadastrada"
+         keyExtractor={(receita) => receita.rowIndex}
 
-               const textoData = recebida
-                  ? `Recebido em ${r.dataRecebimento}`
-                  : `Previsto para ${r.dataPrevista}`
+         renderMobileItem={(receita) => {
+            const recebida = !!receita.dataRecebimento
 
-               return (
-                  <div
-                     key={r.rowIndex}
-                     onClick={() => onSelect(r)}
-                     className={`
-          rounded-lg border p-3 cursor-pointer transition
-          hover:bg-muted
-          ${recebida ? 'border-green-500/40 bg-green-50' : ''}
-        `}
-                  >
-                     <div className="flex justify-between items-start">
-                        <div className="font-medium">{r.descricao}</div>
-                        <div className="font-semibold">
-                           {numeroParaMoeda(r.valor)}
-                        </div>
-                     </div>
+            const textoData = recebida
+               ? `Recebido em ${receita.dataRecebimento}`
+               : `Previsto para ${receita.dataPrevista}`
 
-                     <div className="mt-1 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">{textoData}</span>
-                        <span
-                           className={`font-medium ${recebida ? 'text-green-600' : 'text-blue-500'
-                              }`}
-                        >
+            return (
+               <ListItemLayout
+                  onClick={() => onSelect(receita)}
+                  variant={recebida ? 'success' : 'default'}
+                  className="p-3"
+               >
+                  <ListItemHeaderMobile
+                     title={receita.descricao}
+                     right={numeroParaMoeda(receita.valor)}
+                  />
+
+                  <ListItemFooterMobile
+                     left={textoData}
+                     right={
+                        <span className={recebida ? 'text-green-600' : 'text-blue-500'}>
                            {recebida ? 'Recebido' : 'Em aberto'}
                         </span>
-                     </div>
-                  </div>
-               )
-            })}
-         </div>
+                     }
+                  />
+               </ListItemLayout>
+            )
+         }}
 
+         renderDesktopItem={(receita) => {
+            const recebida = !!receita.dataRecebimento
 
-         {/* DESKTOP MODERNO */}
-         <div className="hidden sm:grid grid-cols-12 gap-3">
-            {receitas.map(r => {
-               const recebida = !!r.dataRecebimento
+            const textoData = recebida
+               ? `Recebido em ${receita.dataRecebimento}`
+               : `Previsto para ${receita.dataPrevista}`
 
-               const textoData = recebida
-                  ? `Recebido em ${r.dataRecebimento}`
-                  : `Previsto para ${r.dataPrevista}`
+            return (
+               <ListItemRowDesktop
+                  onClick={() => onSelect(receita)}
+                  variant={recebida ? 'success' : 'default'}
+               >
+                  <ListColDescription>
+                     {receita.descricao}
+                  </ListColDescription>
 
-               return (
-                  <div
-                     key={r.rowIndex}
-                     onClick={() => onSelect(r)}
-                     className={`
-          col-span-12 grid grid-cols-12 items-center p-4
-          rounded-lg border cursor-pointer transition
-          hover:shadow-md
-          ${recebida ? 'border-green-500/40 bg-green-50' : ''}
-        `}
-                  >
-                     <div className="col-span-4 font-medium">
-                        {r.descricao}
-                     </div>
+                  <ListColMuted span={4}>
+                     {textoData}
+                  </ListColMuted>
 
-                     <div className="col-span-4 text-sm text-muted-foreground">
-                        {textoData}
-                     </div>
+                  <ListColValue>
+                     {numeroParaMoeda(receita.valor)}
+                  </ListColValue>
 
-                     <div className="col-span-2 text-right font-semibold">
-                        {numeroParaMoeda(r.valor)}
-                     </div>
-
-                     <div
-                        className={`col-span-2 text-right font-medium ${recebida ? 'text-green-600' : 'text-blue-500'
-                           }`}
-                     >
+                  <div className="col-span-2 text-right font-medium">
+                     <span className={recebida ? 'text-green-600' : 'text-blue-500'}>
                         {recebida ? 'Recebido' : 'Em aberto'}
-                     </div>
+                     </span>
                   </div>
-               )
-            })}
-         </div>
-
-      </>
+               </ListItemRowDesktop>
+            )
+         }}
+      />
    )
 }

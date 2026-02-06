@@ -7,6 +7,7 @@ import { SkeletonLista } from '@/components/ui/SkeletonLista'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Compromisso } from '@/types/Compromisso'
 import { useCompromisso } from '@/hooks/useCompromisso'
+import { Layout } from '@/components/layout/Layout'
 
 export function Compromisso() {
    const { mes, ano } = usePeriodo()
@@ -16,23 +17,18 @@ export function Compromisso() {
    const [modalAberto, setModalAberto] = useState(false)
    const navigate = useNavigate()
 
+   const handleBack = () => navigate('/')
+
    if (isLoading) {
       return (
-         <div className="mx-auto max-w-5xl p-4">
+         <Layout title="Compromissos" onBack={handleBack}>
             <SkeletonLista />
-         </div>
+         </Layout>
       )
    }
 
    return (
-      <div className="p-4 max-w-3xl mx-auto">
-         <button
-            className="mb-4 px-3 py-1 rounded-md border hover:bg-gray-100 transition"
-            onClick={() => navigate('/')}
-         >
-            ← Voltar
-         </button>
-
+      <Layout title="Compromissos" onBack={handleBack}>
          <div className="flex justify-end mb-4">
             <button
                onClick={() => setModalAberto(true)}
@@ -42,8 +38,6 @@ export function Compromisso() {
                + Novo Compromisso
             </button>
          </div>
-
-         <h2 className="text-lg font-semibold mb-2">Compromissos</h2>
 
          <CompromissoLista
             compromissos={compromissos}
@@ -61,6 +55,6 @@ export function Compromisso() {
             onClose={() => setCompromissoSelecionado(null)}
             onConfirmar={() => { }}
          />
-      </div>
+      </Layout>
    )
 }

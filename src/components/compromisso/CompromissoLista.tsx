@@ -1,5 +1,14 @@
-import type { Compromisso } from "@/types/Compromisso"
-import { numeroParaMoeda } from "@/utils/formatadores"
+import { ListLayout } from '@/components/layout/ListLayout'
+import { ListItemLayout } from '@/components/layout/ListItemLayout'
+import type { Compromisso } from '@/types/Compromisso'
+import { formatarDataBR, numeroParaMoeda } from '@/utils/formatadores'
+import { ListItemHeaderMobile } from '@/components/layout/ListItemHeaderMobile'
+import { ListItemFooterMobile } from '@/components/layout/ListItemFooterMobile'
+import { ListItemRowDesktop } from '@/components/layout/ListItemRowDesktop'
+import { ListColDescription } from '@/components/layout/ListColDescription'
+import { ListColMuted } from '@/components/layout/ListColMuted'
+import { ListColValue } from '@/components/layout/ListColValue'
+import { ListColStatus } from '@/components/layout/ListColStatus'
 
 interface Props {
    compromissos: Compromisso[]
@@ -7,6 +16,7 @@ interface Props {
 }
 
 function estaVencido(dataVencimento: string) {
+   dataVencimento = formatarDataBR(dataVencimento);
    const [d, m, a] = dataVencimento.split('/').map(Number)
 
    const vencimento = new Date(a, m - 1, d)
@@ -19,132 +29,105 @@ function estaVencido(dataVencimento: string) {
 }
 
 export function CompromissoLista({ compromissos, onSelect }: Props) {
-   if (compromissos.length === 0) {
-      return (
-         <p className="text-sm text-muted-foreground">
-            Nenhum compromisso cadastrado
-         </p>
-      )
-   }
-
    return (
-      <>
-         {/* MOBILE */}
-         <div className="space-y-2 sm:hidden">
-            {compromissos.map(r => {
-               const isPago = !!r.dataPagamento
-               const isCartao = r.tipo === 'Cartão'
-               const isVencido = !isPago && estaVencido(r.dataVencimento)
+      <ListLayout
+         itens={compromissos}
+         vazioTexto="Nenhum compromisso cadastrado"
+         keyExtractor={(compromisso) => compromisso.rowIndex}
 
-               return (
-                  <div
-                     key={r.rowIndex}
-                     onClick={() => onSelect(r)}
-                     className={`
-                        rounded-lg border p-3 cursor-pointer transition
-                        hover:bg-muted
-                        ${isPago && 'border-green-500/40 bg-green-50'}
-                        ${isVencido && 'border-red-500/40 bg-red-50'}
-                     `}
-                  >
-                     <div className="flex justify-between items-start">
-                        <div className="font-medium">{r.descricao}</div>
+         renderMobileItem={(compromisso) => {
+            const isPago = !!compromisso.dataPagamento
+            const isCartao = compromisso.tipo === 'Cartão'
+            const isVencido = !isPago && estaVencido(compromisso.dataVencimento)
 
-                        <div className="font-semibold">
-                           {numeroParaMoeda(r.valor)}
-                        </div>
+            const variant =
+               isPago ? 'success' :
+                  isVencido ? 'danger' :
+                     'warning'
+
+            return (
+               <ListItemLayout
+                  onClick={() => onSelect(compromisso)}
+                  variant={variant}
+                  className="p-3"
+               >
+                  <ListItemHeaderMobile
+                     title={compromisso.descricao}
+                     right={numeroParaMoeda(compromisso.valor)}
+                  />
+
+                  {isCartao && (
+                     <div className="mt-1 text-xs text-muted-foreground">
+                        {compromisso.cartao}
+                        {(compromisso.totalParcelas ?? 1) > 1 && (
+                           <> • Parcela {compromisso.parcelas}/{compromisso.totalParcelas}</>
+                        )}
                      </div>
+                  )}
 
-                     {isCartao && (
-                        <div className="mt-1 text-xs text-muted-foreground">
-                           {r.cartao}
-                           {(r.totalParcelas ?? 1) > 1 && (
-                              <> • Parcela {r.parcelas}/{r.totalParcelas}</>
-                           )}
-                        </div>
-                     )}
-
-                     <div className="mt-1 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                           {isPago
-                              ? `Pago em ${r.dataPagamento}`
-                              : `Vence em ${r.dataVencimento}`}
-                        </span>
-
+                  <ListItemFooterMobile
+                     left={
+                        isPago ? `Pago em ${compromisso.dataPagamento}` : `Vence em ${compromisso.dataVencimento}`
+                     }
+                     right={
                         <span
                            className={`
-                              font-medium
                               ${isPago && 'text-green-600'}
                               ${isVencido && 'text-red-600'}
                               ${!isPago && !isVencido && 'text-amber-500'}
                            `}
                         >
-                           {isPago
-                              ? 'Pago'
-                              : isVencido
-                                 ? 'Vencido'
-                                 : 'Em aberto'}
+                           {isPago ? 'Pago' : isVencido ? 'Vencido' : 'Em aberto'}
                         </span>
-                     </div>
-                  </div>
-               )
-            })}
-         </div>
+                     }
+                  />
+               </ListItemLayout>
+            )
+         }}
 
-         {/* DESKTOP */}
-         <div className="hidden sm:grid grid-cols-12 gap-3">
-            {compromissos.map(r => {
-               const isPago = !!r.dataPagamento
-               const isVencido = !isPago && estaVencido(r.dataVencimento)
+         renderDesktopItem={(compromisso) => {
+            const isPago = !!compromisso.dataPagamento
+            const isVencido = !isPago && estaVencido(compromisso.dataVencimento)
 
-               return (
-                  <div
-                     key={r.rowIndex}
-                     onClick={() => onSelect(r)}
-                     className={`
-                        col-span-12 grid grid-cols-12 items-center p-4
-                        rounded-lg border cursor-pointer transition
-                        hover:shadow-md
-                        ${isPago && 'bg-green-50 border-green-200'}
-                        ${isVencido && 'bg-red-50 border-red-200'}
-                     `}
-                  >
-                     <div className="col-span-4 font-medium">
-                        {r.descricao}
-                     </div>
+            const variant = isPago ? 'success' : isVencido ? 'danger' : 'default'
 
-                     <div className="col-span-2 text-sm text-muted-foreground capitalize">
-                        {r.tipo}
-                     </div>
+            return (
+               <ListItemRowDesktop
+                  onClick={() => onSelect(compromisso)}
+                  variant={variant}
+               >
+                  <ListColDescription>
+                     {compromisso.descricao}
+                  </ListColDescription>
 
-                     <div className="col-span-3 text-sm text-muted-foreground">
-                        {isPago
-                           ? `Pago em ${r.dataPagamento}`
-                           : `Vence em ${r.dataVencimento}`}
-                     </div>
+                  <ListColMuted span={2}>
+                     {compromisso.tipo}
+                  </ListColMuted>
 
-                     <div className="col-span-2 text-right font-semibold">
-                        {numeroParaMoeda(r.valor)}
-                     </div>
+                  <ListColMuted span={3}>
+                     {isPago
+                        ? `Pago em ${compromisso.dataPagamento}`
+                        : `Vence em ${compromisso.dataVencimento}`}
+                  </ListColMuted>
 
-                     <div
+                  <ListColValue>
+                     {numeroParaMoeda(compromisso.valor)}
+                  </ListColValue>
+
+                  <ListColStatus>
+                     <span
                         className={`
-                           col-span-1 text-sm font-medium text-right
                            ${isPago && 'text-green-600'}
                            ${isVencido && 'text-red-600'}
                            ${!isPago && !isVencido && 'text-orange-500'}
                         `}
                      >
-                        {isPago
-                           ? 'Pago'
-                           : isVencido
-                              ? 'Vencido'
-                              : 'Aberto'}
-                     </div>
-                  </div>
-               )
-            })}
-         </div>
-      </>
+                        {isPago ? 'Pago' : isVencido ? 'Vencido' : 'Aberto'}
+                     </span>
+                  </ListColStatus>
+               </ListItemRowDesktop>
+            )
+         }}
+      />
    )
 }
