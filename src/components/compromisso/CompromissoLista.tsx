@@ -16,9 +16,7 @@ interface Props {
 }
 
 function estaVencido(dataVencimento: string) {
-   dataVencimento = formatarDataBR(dataVencimento);
-   const [d, m, a] = dataVencimento.split('/').map(Number)
-
+   const [d, m, a]  = dataVencimento.split('/').map(Number)
    const vencimento = new Date(a, m - 1, d)
    vencimento.setHours(0, 0, 0, 0)
 
@@ -39,7 +37,6 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
             const isPago = !!compromisso.dataPagamento
             const isCartao = compromisso.tipo === 'Cartão'
             const isVencido = !isPago && estaVencido(compromisso.dataVencimento)
-
             const variant =
                isPago ? 'success' :
                   isVencido ? 'danger' :
@@ -60,7 +57,7 @@ export function CompromissoLista({ compromissos, onSelect }: Props) {
                      <div className="mt-1 text-xs text-muted-foreground">
                         {compromisso.cartao}
                         {(compromisso.totalParcelas ?? 1) > 1 && (
-                           <> • Parcela {compromisso.parcelas}/{compromisso.totalParcelas}</>
+                           <> • Parcela {compromisso.parcela}/{compromisso.totalParcelas}</>
                         )}
                      </div>
                   )}

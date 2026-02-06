@@ -80,7 +80,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             categoria,
             cartao,
             valor: moedaParaNumero(valorTotal),
-            parcelas: Number(totalParcelas),
+            totalParcelas: Number(totalParcelas),
             dataVencimento: dataVencimentoCartao
          })
       } else {
