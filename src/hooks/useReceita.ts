@@ -5,21 +5,18 @@ import {
    atualizarReceita,
    excluirReceita
 } from '@/api/endpoints/receita'
+import { } from '@tanstack/react-query';
 
-import { useLocation } from 'react-router-dom';
 import type { Receita } from '@/types/Receita'
 
 export function useReceita(mes: string, ano: string) {
    const queryClient = useQueryClient()
    const queryKey = ['receitas', mes, ano]
-   const location = useLocation();
-   const enabled = ['/receitas', '/'].includes(location.pathname)
 
    const { data: receitas = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarReceitas(mes, String(ano)),
-      staleTime: Infinity,
-      enabled
+      staleTime: Infinity
    })
 
    const criarMutation = useMutation({

@@ -1,3 +1,9 @@
+export interface Dashboard {
+  saldoMensal: SaldoMensal[];
+  topCategorias: Categoria[];
+  resumoCartoes: Cartao[];
+}
+
 export interface Cartao {
    cartao: string;
    imagem: string;

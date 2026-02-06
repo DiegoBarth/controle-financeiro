@@ -6,20 +6,15 @@ import {
    excluirGasto
 } from '@/api/endpoints/gasto'
 import type { Gasto } from '@/types/Gasto'
-import { useLocation } from 'react-router-dom'
 
 export function useGasto(mes: string, ano: string) {
    const queryClient = useQueryClient()
    const queryKey = ['gastos', mes, ano]
 
-   const location = useLocation();
-   const enabled = ['/gastos', '/'].includes(location.pathname)
-
    const { data: gastos = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarGastos(mes, String(ano)),
-      staleTime: Infinity,
-      enabled
+      staleTime: Infinity
    })
 
    const criarMutation = useMutation({

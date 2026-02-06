@@ -8,21 +8,21 @@ import {
 } from '@/api/endpoints/compromisso'
 import type { Compromisso } from '@/types/Compromisso'
 import { dataBRParaISO, getMesAno } from '@/utils/formatadores'
-import { useLocation } from 'react-router-dom'
 
 export function useCompromisso(mes: string, ano: string, chave?: string | null) {
    const queryClient = useQueryClient()
    const queryKey = ['compromissos', chave ?? mes, ano]
-   const location = useLocation();
-   const enabled = chave
-      ? ['/compromissos', '/'].includes(location.pathname)
-      : location.pathname === '/compromissos';
 
    const { data: compromissos = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarCompromissos(mes, String(ano)),
-      staleTime: Infinity,
-      enabled
+      staleTime: Infinity
+   })
+
+   const { data: compromissosAlerta = [] } = useQuery({
+      queryKey,
+      queryFn: () => listarCompromissos(mes, String(ano)),
+      staleTime: Infinity
    })
 
    const criarMutation = useMutation({
@@ -121,13 +121,14 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
 
    return {
       compromissos,
+      compromissosAlerta,
       isLoading,
       isError,
       criar: criarMutation.mutateAsync,
       criarCartao: criarCartaoMutation.mutateAsync,
       atualizar: atualizarMutation.mutateAsync,
       excluir: excluirMutation.mutateAsync,
-      isSalvando:/* criarMutation.isPending || */atualizarMutation.isPending,
+      isSalvando: criarMutation.isPending || criarCartaoMutation.isPending || atualizarMutation.isPending,
       isExcluindo: excluirMutation.isPending
    }
 }
