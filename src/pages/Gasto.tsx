@@ -7,32 +7,27 @@ import { ModalEditarGasto } from '@/components/gasto/ModalEditarGasto'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Gasto } from '@/types/Gasto'
 import { useGasto } from '@/hooks/useGasto'
+import { Layout } from '@/components/layout/Layout'
 
 export function Gasto() {
    const { mes, ano } = usePeriodo()
    const { gastos, isLoading } = useGasto(mes, String(ano))
    const navigate = useNavigate()
+   const handleBack = () => navigate('/')
 
    const [gastoSelecionado, setGastoSelecionado] = useState<Gasto | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
 
    if (isLoading) {
       return (
-         <div className="mx-auto max-w-5xl p-4">
+         <Layout title="Gastos" onBack={handleBack}>
             <SkeletonLista />
-         </div>
+         </Layout>
       )
    }
 
    return (
-      <div className="p-4 max-w-3xl mx-auto">
-         <button
-            className="mb-4 px-3 py-1 rounded-md border hover:bg-gray-100 transition"
-            onClick={() => navigate('/')}
-         >
-            ← Voltar
-         </button>
-
+      <Layout title="Gastos" onBack={handleBack}>
          <div className="flex justify-end mb-4">
             <button
                onClick={() => setModalAberto(true)}
@@ -42,8 +37,6 @@ export function Gasto() {
                + Novo Gasto
             </button>
          </div>
-
-         <h2 className="text-lg font-semibold mb-2">Gastos</h2>
 
          <GastoLista
             gastos={gastos}
@@ -60,6 +53,6 @@ export function Gasto() {
             gasto={gastoSelecionado}
             onClose={() => setGastoSelecionado(null)}
          />
-      </div>
+      </Layout>
    )
 }

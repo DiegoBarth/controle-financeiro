@@ -7,32 +7,27 @@ import { ModalEditarReceita } from '@/components/receita/ModalEditarReceita'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import type { Receita } from '@/types/Receita'
 import { useReceita } from '@/hooks/useReceita'
+import { Layout } from '@/components/layout/Layout'
 
 export function Receita() {
    const { mes, ano } = usePeriodo()
    const { receitas, isLoading } = useReceita(mes, String(ano))
    const navigate = useNavigate()
+   const handleBack = () => navigate('/')
 
    const [receitaSelecionada, setReceitaSelecionada] = useState<Receita | null>(null)
    const [modalAberto, setModalAberto] = useState(false)
 
    if (isLoading) {
       return (
-         <div className="mx-auto max-w-5xl p-4">
+         <Layout title="Receitas" onBack={handleBack}>
             <SkeletonLista />
-         </div>
+         </Layout>
       )
    }
 
    return (
-      <div className="p-4 max-w-3xl mx-auto">
-         <button
-            className="mb-4 px-3 py-1 rounded-md border hover:bg-gray-100"
-            onClick={() => navigate('/')}
-         >
-            ← Voltar
-         </button>
-
+      <Layout title="Receitas" onBack={handleBack}>
          <div className="flex justify-end mb-4">
             <button
                onClick={() => setModalAberto(true)}
@@ -42,8 +37,6 @@ export function Receita() {
                + Nova receita
             </button>
          </div>
-
-         <h2 className="text-lg font-semibold mb-2">Receitas</h2>
 
          <ReceitaLista
             receitas={receitas}
@@ -60,6 +53,6 @@ export function Receita() {
             receita={receitaSelecionada}
             onClose={() => setReceitaSelecionada(null)}
          />
-      </div>
+      </Layout>
    )
 }

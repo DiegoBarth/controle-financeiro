@@ -1,5 +1,14 @@
-import type { Gasto } from "@/types/Gasto"
-import { numeroParaMoeda } from "@/utils/formatadores"
+import { ListLayout } from '@/components/layout/ListLayout'
+import { ListItemLayout } from '@/components/layout/ListItemLayout'
+import type { Gasto } from '@/types/Gasto'
+import { numeroParaMoeda } from '@/utils/formatadores'
+import { ListItemHeaderMobile } from '@/components/layout/ListItemHeaderMobile'
+import { ListItemFooterMobile } from '@/components/layout/ListItemFooterMobile'
+import { ListItemRowDesktop } from '@/components/layout/ListItemRowDesktop'
+import { ListColDescription } from '@/components/layout/ListColDescription'
+import { ListColMuted } from '@/components/layout/ListColMuted'
+import { ListColStatus } from '@/components/layout/ListColStatus'
+import { ListColValue } from '@/components/layout/ListColValue'
 
 interface Props {
    gastos: Gasto[]
@@ -7,89 +16,66 @@ interface Props {
 }
 
 export function GastoLista({ gastos, onSelect }: Props) {
-   if (gastos.length === 0) {
-      return (
-         <p className="text-sm text-muted-foreground">
-            Nenhum gasto cadastrado
-         </p>
-      )
-   }
-
    return (
-      <>
-         {/* MOBILE */}
-         <div className="space-y-2 sm:hidden">
-            {gastos.map(r => (
-               <div
-                  key={r.rowIndex}
-                  onClick={() => onSelect(r)}
-                  className="
-        rounded-lg border p-3 cursor-pointer
-        hover:bg-muted transition
-      "
-               >
-                  <div className="flex justify-between items-start">
-                     <div className="font-medium">
-                        {r.descricao}
-                     </div>
+      <ListLayout
+         itens={gastos}
+         vazioTexto="Nenhum gasto cadastrado"
+         keyExtractor={(gasto) => gasto.rowIndex}
 
-                     <div className="font-semibold text-red-600">
-                        {numeroParaMoeda(r.valor)}
-                     </div>
-                  </div>
-
-                  <div className="mt-1 flex items-center justify-between text-xs">
-                     <span className="text-muted-foreground">
-                        Pago em {r.dataPagamento} • {r.categoria}
+         renderMobileItem={(gasto) => (
+            <ListItemLayout
+               onClick={() => onSelect(gasto)}
+               className="p-3"
+            >
+               <ListItemHeaderMobile
+                  title={gasto.descricao}
+                  right={
+                     <span className="text-red-600">
+                        {numeroParaMoeda(gasto.valor)}
                      </span>
+                  }
+               />
 
-                     <span className="font-medium text-green-600">
+               <ListItemFooterMobile
+                  left={`Pago em ${gasto.dataPagamento} • ${gasto.categoria}`}
+                  right={
+                     <span className="text-green-600">
                         Pago
                      </span>
-                  </div>
-               </div>
-            ))}
-         </div>
+                  }
+               />
+            </ListItemLayout>
+         )}
 
-         {/* DESKTOP MODERNO */}
-         <div className="hidden sm:grid grid-cols-12 gap-3">
-            {gastos.map(r => (
-               <div
-                  key={r.rowIndex}
-                  onClick={() => onSelect(r)}
-                  className="
-        col-span-12 grid grid-cols-12 items-center p-4
-        rounded-lg border hover:shadow-md cursor-pointer transition
-      "
-               >
-                  {/* Descrição */}
-                  <div className="col-span-4 font-medium">
-                     {r.descricao}
-                  </div>
+         renderDesktopItem={(gasto) => (
+            <ListItemRowDesktop
+               onClick={() => onSelect(gasto)}
+            >
+               <ListColDescription>
+                  {gasto.descricao}
+               </ListColDescription>
 
-                  {/* Categoria (ou placeholder) */}
-                  <div className="col-span-2 text-sm text-muted-foreground capitalize">
-                     {r.categoria ?? '-'}
-                  </div>
+               <ListColMuted span={2}>
+                  {gasto.categoria ?? '-'}
+               </ListColMuted>
 
-                  {/* Data */}
-                  <div className="col-span-3 text-sm text-muted-foreground">
-                     Pago em {r.dataPagamento}
-                  </div>
+               <ListColMuted span={3}>
+                  Pago em {gasto.dataPagamento}
+               </ListColMuted>
 
-                  {/* Valor */}
-                  <div className="col-span-2 text-right font-semibold text-red-600">
-                     {numeroParaMoeda(r.valor)}
-                  </div>
+               <ListColValue>
+                  <span className="text-red-600">
+                     {numeroParaMoeda(gasto.valor)}
+                  </span>
+               </ListColValue>
 
-                  {/* Status */}
-                  <div className="col-span-1 text-sm font-medium text-right text-green-600">
+               <ListColStatus>
+                  <span className="text-green-600">
                      Pago
-                  </div>
-               </div>
-            ))}
-         </div>
-
-      </>
+                  </span>
+               </ListColStatus>
+            </ListItemRowDesktop>
+         )}
+      />
    )
 }
