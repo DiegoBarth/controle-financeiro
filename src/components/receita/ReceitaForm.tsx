@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { criarReceita } from '@/api/endpoints/receita';
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores';
+import { useToast } from '@/contexts/toast';
 
 interface Props {
    onSalvar: () => void;
@@ -12,13 +13,14 @@ export function ReceitaForm({ onSalvar }: Props) {
    const [descricao, setDescricao] = useState('');
    const [valor, setValor] = useState('');
    const [persistindo, setPersistindo] = useState(false);
+   const toast = useToast();
 
    async function handleSalvar(e: React.FormEvent) {
       e.preventDefault();
 
       const valorNumero = moedaParaNumero(valor);
       if (valorNumero <= 0) {
-         alert('Valor inválido');
+         toast.warning('Valor inválido');
          return;
       }
 
@@ -33,7 +35,7 @@ export function ReceitaForm({ onSalvar }: Props) {
          });
 
          onSalvar();
-         alert('Receita salva 💸');
+         toast.success('Receita salva 💸');
          setDataPrevista('');
          setDataRecebimento('');
          setDescricao('');

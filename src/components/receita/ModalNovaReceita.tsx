@@ -6,6 +6,8 @@ import {
 } from '@/utils/formatadores'
 import { ModalBase } from '@/components/ui/ModalBase'
 import { useReceita } from '@/hooks/useReceita'
+import { useValidation } from '@/hooks/useValidation'
+import { ReceitaCreateSchema } from '@/schemas/receita.schema'
 
 interface Props {
    aberto: boolean
@@ -15,6 +17,7 @@ interface Props {
 export function ModalNovaReceita({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
    const { criar, isSalvando } = useReceita(mes, String(ano))
+   const { validar } = useValidation()
    const [descricao, setDescricao] = useState('')
    const [valor, setValor] = useState('')
    const [dataPrevista, setDataPrevista] = useState('')
@@ -30,12 +33,16 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
    }, [aberto])
 
    const handleSalvar = async () => {
-      await criar({
+      const dados = validar(ReceitaCreateSchema, {
          descricao,
          valor: moedaParaNumero(valor),
          dataPrevista,
-         dataRecebimento: dataRecebimento || ''
+         dataRecebimento
       })
+
+      if (!dados) return
+
+      await criar(dados as any)
       setDescricao('')
       setValor('')
       setDataPrevista('')
@@ -57,7 +64,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
          <div className="space-y-3">
             <div>
                <label className="block text-xs text-muted-foreground">
-                  Descrição
+                  Descrição *
                </label>
                <input
                   className="w-full border rounded-md p-2"
@@ -68,7 +75,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
 
             <div>
                <label className="block text-xs text-muted-foreground">
-                  Valor
+                  Valor *
                </label>
                <input
                   className="w-full border rounded-md p-2"
@@ -79,7 +86,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
 
             <div>
                <label className="block text-xs text-muted-foreground">
-                  Data prevista
+                  Data prevista *
                </label>
                <input
                   type="date"

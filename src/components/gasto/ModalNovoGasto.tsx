@@ -4,6 +4,8 @@ import { ModalBase } from '@/components/ui/ModalBase'
 import { SelectCustomizado } from '@/components/ui/SelectCustomizado'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useGasto } from '@/hooks/useGasto'
+import { useValidation } from '@/hooks/useValidation'
+import { GastoCreateSchema } from '@/schemas/gasto.schema'
 
 interface Props {
    aberto: boolean
@@ -13,6 +15,7 @@ interface Props {
 export function ModalNovoGasto({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
    const { criar, isSalvando } = useGasto(mes, String(ano))
+   const { validar } = useValidation()
 
    const [descricao, setDescricao] = useState('')
    const [dataPagamento, setDataPagamento] = useState('')
@@ -36,12 +39,16 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
    }, [aberto])
 
    const handleSalvar = async () => {
-      await criar({
+      const dados = validar(GastoCreateSchema, {
          descricao,
          categoria,
          valor: moedaParaNumero(valor),
          dataPagamento
       })
+
+      if (!dados) return
+
+      await criar(dados as any)
       setDescricao('')
       setDataPagamento('')
       setCategoria('')

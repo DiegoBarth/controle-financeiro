@@ -6,15 +6,18 @@ import {
    excluirGasto
 } from '@/api/endpoints/gasto'
 import type { Gasto } from '@/types/Gasto'
+import { useApiError } from '@/hooks/useApiError'
 
 export function useGasto(mes: string, ano: string) {
    const queryClient = useQueryClient()
+   const { handleError } = useApiError()
    const queryKey = ['gastos', mes, ano]
 
    const { data: gastos = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarGastos(mes, String(ano)),
-      staleTime: Infinity
+      staleTime: Infinity,
+      retry: 1
    })
 
    const criarMutation = useMutation({
@@ -25,6 +28,9 @@ export function useGasto(mes: string, ano: string) {
             queryKey,
             old => old ? [...old, novoGasto] : [novoGasto]
          )
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
 
@@ -51,6 +57,9 @@ export function useGasto(mes: string, ano: string) {
          queryClient.invalidateQueries({
             queryKey: ['resumo', mes, ano],
          })
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
 
@@ -62,6 +71,9 @@ export function useGasto(mes: string, ano: string) {
             queryKey,
             old => old?.filter(r => r.rowIndex !== rowIndex) ?? []
          )
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
 

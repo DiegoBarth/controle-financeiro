@@ -6,15 +6,18 @@ import {
    excluirReceita
 } from '@/api/endpoints/receita'
 import type { Receita } from '@/types/Receita'
+import { useApiError } from '@/hooks/useApiError'
 
 export function useReceita(mes: string, ano: string) {
    const queryClient = useQueryClient()
+   const { handleError } = useApiError()
    const queryKey = ['receitas', mes, ano]
 
    const { data: receitas = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarReceitas(mes, String(ano)),
-      staleTime: Infinity
+      staleTime: Infinity,
+      retry: 1
    })
 
    const criarMutation = useMutation({
@@ -25,9 +28,12 @@ export function useReceita(mes: string, ano: string) {
             queryKey,
             old => old ? [...old, novaReceita] : [novaReceita]
          )
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
-
+   
    const atualizarMutation = useMutation({
       mutationFn: (dados: {
          rowIndex: number
@@ -35,7 +41,7 @@ export function useReceita(mes: string, ano: string) {
          dataRecebimento?: string | null
       }) =>
          atualizarReceita(dados),
-      onSuccess: (_data, variables) => {
+         onSuccess: (_data, variables) => {
          queryClient.setQueryData<Receita[]>(
             queryKey,
             old =>
@@ -49,6 +55,9 @@ export function useReceita(mes: string, ano: string) {
                      : r
                ) ?? []
          )
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
 
@@ -60,6 +69,9 @@ export function useReceita(mes: string, ano: string) {
             queryKey,
             old => old?.filter(r => r.rowIndex !== rowIndex) ?? []
          )
+      },
+      onError: (error) => {
+         handleError(error)
       }
    })
 

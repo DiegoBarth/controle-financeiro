@@ -5,6 +5,8 @@ import { SelectCustomizado } from '@/components/ui/SelectCustomizado'
 
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useCompromisso } from '@/hooks/useCompromisso'
+import { useValidation } from '@/hooks/useValidation'
+import { CompromissoCreateSchema, CompromissoCartaoSchema } from '@/schemas/compromisso.schema'
 
 interface Props {
    aberto: boolean
@@ -26,6 +28,7 @@ const cartoes = ['Bradesco', 'Itaú', 'Mercado Pago']
 export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
    const { criar, criarCartao, isSalvando } = useCompromisso(mes, String(ano))
+   const { validar } = useValidation()
 
    const [descricao, setDescricao] = useState('')
    const [categoria, setCategoria] = useState('')
@@ -63,40 +66,33 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    }, [aberto])
 
    async function handleSalvar() {
-      if (!descricao || !categoria || !tipo) {
-         alert('Preencha os campos obrigatórios')
-         return
-      }
-
       if (tipo === 'Cartão') {
-         if (!cartao || !valorTotal || !totalParcelas || !dataVencimentoCartao) {
-            alert('Preencha os campos do cartão')
-            return
-         }
-
-         await criarCartao({
-            tipo: 'Cartão',
+         const dados = validar(CompromissoCartaoSchema, {
             descricao,
             categoria,
+            tipo,
             cartao,
             valor: moedaParaNumero(valorTotal),
             totalParcelas: Number(totalParcelas),
             dataVencimento: dataVencimentoCartao
          })
-      } else {
-         if (!valor || !dataVencimento) {
-            alert('Preencha valor e data de vencimento')
-            return
-         }
 
-         await criar({
-            tipo,
+         if (!dados) return
+
+         await criarCartao(dados as any)
+      } else {
+         const dados = validar(CompromissoCreateSchema, {
             descricao,
             categoria,
+            tipo,
             valor: moedaParaNumero(valor),
             dataVencimento,
             meses: tipo === 'Fixo' ? meses : 1
          })
+
+         if (!dados) return
+
+         await criar(dados as any)
       }
 
       setDescricao('')
