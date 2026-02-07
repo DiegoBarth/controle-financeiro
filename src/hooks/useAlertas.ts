@@ -15,7 +15,6 @@ export function useAlertas() {
    return useMemo(() => {
       const hoje = zerarHora(new Date());
 
-<<<<<<< HEAD
       const compromissosPendentes = compromissosAlerta.filter(c => !c.dataPagamento);
 
       const vencidos = compromissosPendentes.filter(c => {
@@ -51,4 +50,5 @@ export function useAlertas() {
          hoje: vencendoHoje,
          semana: vencendoSemana
       };
-
+   }, [compromissosAlerta]);
+}
