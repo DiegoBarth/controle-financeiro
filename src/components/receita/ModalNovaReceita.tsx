@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { usePeriodo } from '@/contexts/PeriodoContext'
 import {
    formatarMoeda,
@@ -8,46 +9,48 @@ import { ModalBase } from '@/components/ui/ModalBase'
 import { useReceita } from '@/hooks/useReceita'
 import { useValidation } from '@/hooks/useValidation'
 import { ReceitaCreateSchema } from '@/schemas/receita.schema'
+import type { Receita } from '@/types/Receita'
 
 interface Props {
    aberto: boolean
    onClose: () => void
 }
 
+const defaultValues: Partial<Receita> = {
+   descricao: '',
+   valor: '',
+   dataPrevista: '',
+   dataRecebimento: ''
+}
+
 export function ModalNovaReceita({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
    const { criar, isSalvando } = useReceita(mes, String(ano))
    const { validar } = useValidation()
-   const [descricao, setDescricao] = useState('')
-   const [valor, setValor] = useState('')
-   const [dataPrevista, setDataPrevista] = useState('')
-   const [dataRecebimento, setDataRecebimento] = useState('')
+
+   const { control, register, handleSubmit, reset } = useForm<Receita>({
+      defaultValues
+   })
 
    useEffect(() => {
       if (!aberto) {
-         setDescricao('')
-         setValor('')
-         setDataPrevista('')
-         setDataRecebimento('')
+         reset(defaultValues)
       }
-   }, [aberto])
+   }, [aberto, reset])
 
-   const handleSalvar = async () => {
+   const handleSalvar = async (values: Receita) => {
       const dados = validar(ReceitaCreateSchema, {
-         descricao,
-         valor: moedaParaNumero(valor),
-         dataPrevista,
-         dataRecebimento
+         descricao: values.descricao,
+         valor: moedaParaNumero(String(values.valor)),
+         dataPrevista: values.dataPrevista,
+         dataRecebimento: values.dataRecebimento
       })
 
       if (!dados) return
 
       await criar(dados as any)
-      setDescricao('')
-      setValor('')
-      setDataPrevista('')
-      setDataRecebimento('')
 
+      reset(defaultValues)
       onClose()
    }
 
@@ -59,7 +62,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
          tipo="inclusao"
          loading={isSalvando}
          loadingTexto="Salvando..."
-         onSalvar={() => handleSalvar()}
+         onSalvar={handleSubmit(handleSalvar)}
       >
          <div className="space-y-3">
             <div>
@@ -68,8 +71,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
                </label>
                <input
                   className="w-full border rounded-md p-2"
-                  value={descricao}
-                  onChange={e => setDescricao(e.target.value)}
+                  {...register('descricao')}
                />
             </div>
 
@@ -77,10 +79,17 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
                <label className="block text-xs text-muted-foreground">
                   Valor *
                </label>
-               <input
-                  className="w-full border rounded-md p-2"
-                  value={valor}
-                  onChange={e => setValor(formatarMoeda(e.target.value))}
+               <Controller
+                  name="valor"
+                  control={control}
+                  render={({ field }) => (
+                     <input
+                        className="w-full border rounded-md p-2"
+                        value={field.value}
+                        onChange={e => field.onChange(formatarMoeda(e.target.value))}
+                     />
+                  )}
+
                />
             </div>
 
@@ -91,8 +100,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
                <input
                   type="date"
                   className="w-full border rounded-md p-2"
-                  value={dataPrevista}
-                  onChange={e => setDataPrevista(e.target.value)}
+                  {...register('dataPrevista')}
                />
             </div>
 
@@ -103,8 +111,7 @@ export function ModalNovaReceita({ aberto, onClose }: Props) {
                <input
                   type="date"
                   className="w-full border rounded-md p-2"
-                  value={dataRecebimento}
-                  onChange={e => setDataRecebimento(e.target.value)}
+                  {...register('dataRecebimento')}
                />
             </div>
          </div>

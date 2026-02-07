@@ -6,7 +6,7 @@ export async function criarReceita(payload: {
    dataPrevista: string;
    dataRecebimento?: string | null;
    descricao: string;
-   valor: number;
+   valor: number | string;
 }) {
    const res = await apiPost<Receita>({
       acao: 'criarReceita',

@@ -4,7 +4,7 @@ import type { Gasto } from '@/types/Gasto';
 export async function criarGasto(payload: {
    descricao: string;
    categoria: string;
-   valor: number;
+   valor: number | string;
    dataPagamento: string;
 }) {
    const res = await apiPost<Gasto>({

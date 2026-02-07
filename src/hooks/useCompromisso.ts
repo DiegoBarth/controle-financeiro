@@ -247,7 +247,7 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
       registros.forEach(registro => {
          // Extrai mês/ano da data de vencimento
          const { mes: regisMes, ano: regisAno } = getMesAno(registro.dataVencimento)
-
+         
          // Atualiza cache do período específico
          queryClient.setQueryData<Compromisso[]>(
             ['compromissos', regisMes, regisAno],

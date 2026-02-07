@@ -56,8 +56,8 @@ export function moedaParaNumero(valor: string): number {
  * numeroParaMoeda(1234.56) // → "R$ 1.234,56"
  * numeroParaMoeda(0)       // → "R$ 0,00"
  */
-export function numeroParaMoeda(valor: number): string {
-   return valor.toLocaleString('pt-BR', {
+export function numeroParaMoeda(valor: number | string): string {
+   return Number(valor).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL'
    });
@@ -160,5 +160,5 @@ export function formatarDataBR(data: string | Date): string {
  */
 export function getMesAno(data: string): { mes: string; ano: string } {
    const [_dia, mes, ano] = data.split('/');
-   return { mes, ano };
+   return { mes: String(Number(mes)), ano };
 }

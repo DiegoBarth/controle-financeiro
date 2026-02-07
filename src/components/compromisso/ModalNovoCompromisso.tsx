@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { moedaParaNumero, formatarMoeda } from '@/utils/formatadores'
 import { ModalBase } from '@/components/ui/ModalBase'
 import { SelectCustomizado } from '@/components/ui/SelectCustomizado'
@@ -8,7 +9,7 @@ import { useCompromisso } from '@/hooks/useCompromisso'
 import { useValidation } from '@/hooks/useValidation'
 import { CompromissoCreateSchema, CompromissoCartaoSchema } from '@/schemas/compromisso.schema'
 import { CATEGORIAS, TIPOS, CARTOES } from '@/config/constants'
-
+import type { Compromisso } from '@/types/Compromisso'
 interface Props {
    aberto: boolean
    onClose: () => void
@@ -16,56 +17,52 @@ interface Props {
 
 type TipoCompromisso = 'Fixo' | 'Variável' | 'Cartão' | ''
 
+const defaultValues: Partial<Compromisso> = {
+   descricao: '',
+   categoria: '',
+   tipo: '',
+   dataVencimento: '',
+   meses: 1,
+   cartao: '',
+   valor: '',
+   totalParcelas: 1
+}
+
 export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
    const { criar, criarCartao, isSalvando } = useCompromisso(mes, String(ano))
    const { validar } = useValidation()
 
-   const [descricao, setDescricao] = useState('')
-   const [categoria, setCategoria] = useState('')
-   const [tipo, setTipo] = useState<TipoCompromisso>('')
+   const { control, register, handleSubmit, watch, setValue, reset } = useForm<Compromisso>({
+      defaultValues
+   })
 
-   const [valor, setValor] = useState('')
-   const [dataVencimento, setDataVencimento] = useState('')
-   const [meses, setMeses] = useState(1)
-
-   const [cartao, setCartao] = useState('')
-   const [valorTotal, setValorTotal] = useState('')
-   const [totalParcelas, setTotalParcelas] = useState<number | ''>('')
-   const [dataVencimentoCartao, setDataVencimentoCartao] = useState('')
+   const tipo = watch('tipo')
+   const dataVencimento = watch('dataVencimento')
 
    useEffect(() => {
       if (tipo === 'Fixo' && dataVencimento) {
          const data = new Date(dataVencimento)
-         setMeses(12 - data.getMonth())
+         setValue('meses', 12 - data.getMonth())
       }
-   }, [tipo, dataVencimento])
+   }, [tipo, dataVencimento, setValue])
 
    useEffect(() => {
       if (!aberto) {
-         setDescricao('')
-         setCategoria('')
-         setTipo('')
-         setValor('')
-         setDataVencimento('')
-         setMeses(1)
-         setCartao('')
-         setValorTotal('')
-         setTotalParcelas('')
-         setDataVencimentoCartao('')
+         reset(defaultValues)
       }
-   }, [aberto])
+   }, [aberto, reset])
 
-   async function handleSalvar() {
+   async function handleSalvar(values: Compromisso) {
       if (tipo === 'Cartão') {
          const dados = validar(CompromissoCartaoSchema, {
-            descricao,
-            categoria,
+            descricao: values.descricao,
+            categoria: values.categoria,
             tipo,
-            cartao,
-            valor: moedaParaNumero(valorTotal),
-            totalParcelas: Number(totalParcelas),
-            dataVencimento: dataVencimentoCartao
+            cartao: values.cartao,
+            valor: moedaParaNumero(String(values.valor)),
+            totalParcelas: Number(values.totalParcelas),
+            dataVencimento: values.dataVencimento
          })
 
          if (!dados) return
@@ -73,12 +70,12 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          await criarCartao(dados as any)
       } else {
          const dados = validar(CompromissoCreateSchema, {
-            descricao,
-            categoria,
+            descricao: values.descricao,
+            categoria: values.categoria,
             tipo,
-            valor: moedaParaNumero(valor),
-            dataVencimento,
-            meses: tipo === 'Fixo' ? meses : 1
+            valor: moedaParaNumero(String(values.valor)),
+            dataVencimento: values.dataVencimento,
+            meses: tipo === 'Fixo' ? values.meses : 1
          })
 
          if (!dados) return
@@ -86,17 +83,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          await criar(dados as any)
       }
 
-      setDescricao('')
-      setCategoria('')
-      setTipo('')
-      setValor('')
-      setDataVencimento('')
-      setMeses(1)
-      setCartao('')
-      setValorTotal('')
-      setTotalParcelas('')
-      setDataVencimentoCartao('')
-
+      reset(defaultValues)
       onClose()
    }
 
@@ -108,48 +95,63 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          tipo="inclusao"
          loading={isSalvando}
          loadingTexto="Salvando..."
-         onSalvar={() => handleSalvar()}
+         onSalvar={handleSubmit(handleSalvar)}
       >
          <div className="space-y-3">
-            {/* Descrição */}
             <div>
                <label className="block text-xs text-muted-foreground">Descrição *</label>
                <input
                   className="mt-1 w-full rounded-md border p-2"
-                  value={descricao}
-                  onChange={e => setDescricao(e.target.value)}
+                  {...register('descricao')}
                />
             </div>
 
-            {/* Categoria */}
             <div>
                <label className="block text-xs text-muted-foreground mb-1">Categoria *</label>
-               <SelectCustomizado
-                  value={categoria}
-                  onChange={setCategoria}
-                  options={CATEGORIAS}
+               <Controller
+                  name="categoria"
+                  control={control}
+                  render={({ field }) => (
+                     <SelectCustomizado
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={CATEGORIAS}
+                     />
+                  )}
+
                />
             </div>
 
-            {/* Tipo */}
             <div>
                <label className="block text-xs text-muted-foreground mb-1">Tipo *</label>
-               <SelectCustomizado
-                  value={tipo}
-                  onChange={value => setTipo(value as TipoCompromisso)}
-                  options={TIPOS}
+               <Controller
+                  name="tipo"
+                  control={control}
+                  render={({ field }) => (
+                     <SelectCustomizado
+                        value={field.value}
+                        onChange={value => field.onChange(value as TipoCompromisso)}
+                        options={TIPOS}
+                     />
+                  )}
+
                />
             </div>
 
-            {/* Fixo / Variável */}
             {(tipo === 'Fixo' || tipo === 'Variável') && (
                <>
                   <div>
                      <label className="block text-xs text-muted-foreground">Valor *</label>
-                     <input
-                        className="mt-1 w-full rounded-md border p-2"
-                        value={valor}
-                        onChange={e => setValor(formatarMoeda(e.target.value))}
+                     <Controller
+                        name="valor"
+                        control={control}
+                        render={({ field }) => (
+                           <input
+                              className="mt-1 w-full rounded-md border p-2"
+                              value={field.value}
+                              onChange={e => field.onChange(formatarMoeda(e.target.value))}
+                           />
+                        )}
                      />
                   </div>
 
@@ -158,8 +160,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                      <input
                         type="date"
                         className="mt-1 w-full rounded-md border p-2"
-                        value={dataVencimento}
-                        onChange={e => setDataVencimento(e.target.value)}
+                        {...register('dataVencimento')}
                      />
                   </div>
 
@@ -173,34 +174,45 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                            min={1}
                            max={12}
                            className="mt-1 w-full rounded-md border p-2"
-                           value={meses}
-                           onChange={e => setMeses(Number(e.target.value))}
+                           {...register('meses', { valueAsNumber: true })}
                         />
                      </div>
                   )}
                </>
             )}
 
-            {/* Cartão */}
             {tipo === 'Cartão' && (
                <>
                   <div>
                      <label className="block text-xs text-muted-foreground mb-1">
                         Cartão *
                      </label>
-                     <SelectCustomizado
-                        value={cartao}
-                        onChange={setCartao}
-                        options={CARTOES}
+                     <Controller
+                        name="cartao"
+                        control={control}
+                        render={({ field }) => (
+                           <SelectCustomizado
+                              value={field.value ?? ''}
+                              onChange={field.onChange}
+                              options={CARTOES}
+                           />
+                        )}
+
                      />
                   </div>
 
                   <div>
                      <label className="block text-xs text-muted-foreground">Valor total *</label>
-                     <input
-                        className="mt-1 w-full rounded-md border p-2"
-                        value={valorTotal}
-                        onChange={e => setValorTotal(formatarMoeda(e.target.value))}
+                     <Controller
+                        name="valor"
+                        control={control}
+                        render={({ field }) => (
+                           <input
+                              className="mt-1 w-full rounded-md border p-2"
+                              value={field.value}
+                              onChange={e => field.onChange(formatarMoeda(e.target.value))}
+                           />
+                        )}
                      />
                   </div>
 
@@ -213,8 +225,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                         min={1}
                         max={60}
                         className="mt-1 w-full rounded-md border p-2"
-                        value={totalParcelas}
-                        onChange={e => setTotalParcelas(Number(e.target.value))}
+                        {...register('totalParcelas')}
                      />
                   </div>
 
@@ -225,8 +236,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                      <input
                         type="date"
                         className="mt-1 w-full rounded-md border p-2"
-                        value={dataVencimentoCartao}
-                        onChange={e => setDataVencimentoCartao(e.target.value)}
+                        {...register('dataVencimento')}
                      />
                   </div>
                </>

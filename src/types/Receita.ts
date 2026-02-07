@@ -3,5 +3,5 @@ export interface Receita {
    descricao: string
    dataPrevista: string
    dataRecebimento?: string | null
-   valor: number
+   valor: number | string
 }

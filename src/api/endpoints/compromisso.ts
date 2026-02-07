@@ -32,7 +32,7 @@ export async function criarCartao(payload: {
    descricao: string;
    categoria: string;
    cartao?: string;
-   valor: number;
+   valor: number | string;
    tipo: string;
    parcelas?: number;
    dataVencimento: string;
