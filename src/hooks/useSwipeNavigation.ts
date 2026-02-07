@@ -17,7 +17,6 @@ export function useSwipeNavigation() {
          const iniciouNaEsquerda = e.initial[0] < EDGE_ZONE
          const iniciouNaDireita = e.initial[0] > larguraTela - EDGE_ZONE
 
-         // --- Horizontal ---
          if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
             if (e.deltaX > 50 && iniciouNaEsquerda && indexAtual > 0) {
                setArrow('left')
@@ -30,7 +29,6 @@ export function useSwipeNavigation() {
             }
          }
 
-         // --- Vertical (pull to refresh) ---
          if (e.deltaY > 50 && window.scrollY === 0) {
             setArrow('up')
          } else if (arrow === 'up') {

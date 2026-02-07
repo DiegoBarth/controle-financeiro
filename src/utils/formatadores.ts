@@ -41,3 +41,8 @@ export function formatarDataBR(data: string | Date): string {
 
    return `${dia}/${mes}/${ano}`;
 }
+
+export function getMesAno(data: string): { mes: string; ano: string } {
+   const [_dia, mes, ano] = data.split('/');
+   return { mes, ano };
+}

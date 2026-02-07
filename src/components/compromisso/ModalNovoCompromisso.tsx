@@ -89,11 +89,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
             return
          }
 
-<<<<<<< HEAD
-         criar({
-=======
          await criar({
->>>>>>> f5110600dbba4a04fe43df32bc75685e901c1d4e
             tipo,
             descricao,
             categoria,
@@ -123,14 +119,9 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
          onClose={onClose}
          titulo="Novo compromisso"
          tipo="inclusao"
-<<<<<<< HEAD
-         onSalvar={handleSalvar}
-         loading={isSalvando}
-=======
          loading={isSalvando}
          loadingTexto="Salvando..."
          onSalvar={() => handleSalvar()}
->>>>>>> f5110600dbba4a04fe43df32bc75685e901c1d4e
       >
          <div className="space-y-3">
             {/* Descrição */}
