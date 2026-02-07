@@ -47,3 +47,17 @@ export const SWIPE_ROUTES = [
    '/compromissos',
    '/dashboard'
 ];
+
+/** Categorias usadas no cadastro de gastos/compromissos */
+export const CATEGORIAS = [
+   'Alimentação', 'Banco', 'Beleza', 'Casa', 'Educação',
+   'Empréstimos', 'Investimento', 'Lazer', 'Pets', 'Presentes',
+   'Roupas', 'Saúde', 'Serviços', 'Streaming', 'Telefonia',
+   'Transporte', 'Viagem'
+];
+
+/** Tipos de compromisso usados no cadastro. */
+export const TIPOS = ['Fixo', 'Variável', 'Cartão'];
+
+/** Cartões usados no cadastro de compromissos do tipo "Cartão". */
+export const CARTOES = ['Bradesco', 'Itaú', 'Mercado Pago'];

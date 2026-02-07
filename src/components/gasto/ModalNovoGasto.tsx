@@ -6,6 +6,7 @@ import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useGasto } from '@/hooks/useGasto'
 import { useValidation } from '@/hooks/useValidation'
 import { GastoCreateSchema } from '@/schemas/gasto.schema'
+import { CATEGORIAS } from '@/config/constants'
 
 interface Props {
    aberto: boolean
@@ -21,13 +22,6 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
    const [dataPagamento, setDataPagamento] = useState('')
    const [valor, setValor] = useState('')
    const [categoria, setCategoria] = useState('')
-
-   const categorias = [
-      'Alimentação', 'Banco', 'Beleza', 'Casa', 'Educação',
-      'Empréstimos', 'Investimento', 'Lazer', 'Pets', 'Presentes',
-      'Roupas', 'Saúde', 'Serviços', 'Streaming', 'Telefonia',
-      'Transporte', 'Viagem'
-   ]
 
    useEffect(() => {
       if (!aberto) {
@@ -91,7 +85,7 @@ export function ModalNovoGasto({ aberto, onClose }: Props) {
                <SelectCustomizado
                   value={categoria}
                   onChange={setCategoria}
-                  options={categorias}
+                  options={CATEGORIAS}
                />
             </div>
 

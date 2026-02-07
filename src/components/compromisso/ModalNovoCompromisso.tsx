@@ -7,6 +7,7 @@ import { usePeriodo } from '@/contexts/PeriodoContext'
 import { useCompromisso } from '@/hooks/useCompromisso'
 import { useValidation } from '@/hooks/useValidation'
 import { CompromissoCreateSchema, CompromissoCartaoSchema } from '@/schemas/compromisso.schema'
+import { CATEGORIAS, TIPOS, CARTOES } from '@/config/constants'
 
 interface Props {
    aberto: boolean
@@ -14,16 +15,6 @@ interface Props {
 }
 
 type TipoCompromisso = 'Fixo' | 'Variável' | 'Cartão' | ''
-
-const categorias = [
-   'Alimentação', 'Banco', 'Beleza', 'Casa', 'Educação',
-   'Empréstimos', 'Investimento', 'Lazer', 'Pets', 'Presentes',
-   'Roupas', 'Saúde', 'Serviços', 'Streaming', 'Telefonia',
-   'Transporte', 'Viagem'
-]
-
-const tipos = ['Fixo', 'Variável', 'Cartão']
-const cartoes = ['Bradesco', 'Itaú', 'Mercado Pago']
 
 export function ModalNovoCompromisso({ aberto, onClose }: Props) {
    const { mes, ano } = usePeriodo()
@@ -136,7 +127,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                <SelectCustomizado
                   value={categoria}
                   onChange={setCategoria}
-                  options={categorias}
+                  options={CATEGORIAS}
                />
             </div>
 
@@ -146,7 +137,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                <SelectCustomizado
                   value={tipo}
                   onChange={value => setTipo(value as TipoCompromisso)}
-                  options={tipos}
+                  options={TIPOS}
                />
             </div>
 
@@ -200,7 +191,7 @@ export function ModalNovoCompromisso({ aberto, onClose }: Props) {
                      <SelectCustomizado
                         value={cartao}
                         onChange={setCartao}
-                        options={cartoes}
+                        options={CARTOES}
                      />
                   </div>
 
