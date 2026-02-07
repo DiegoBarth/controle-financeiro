@@ -20,7 +20,7 @@ export async function criarCompromisso(payload: {
    dataVencimento: string;
    meses?: number;
 }) {
-   const res = await apiPost<Compromisso>({
+   const res = await apiPost<Compromisso[]>({
       acao: 'criarCompromisso',
       ...payload
    });
@@ -37,7 +37,7 @@ export async function criarCartao(payload: {
    parcelas?: number;
    dataVencimento: string;
 }) {
-   const res = await apiPost<Compromisso>({
+   const res = await apiPost<Compromisso[]>({
       acao: 'criarCartao',
       ...payload
    });

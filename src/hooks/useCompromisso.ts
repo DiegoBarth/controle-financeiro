@@ -7,22 +7,22 @@ import {
    excluirCompromisso
 } from '@/api/endpoints/compromisso'
 import type { Compromisso } from '@/types/Compromisso'
-import { dataBRParaISO } from '@/utils/formatadores'
-import { useLocation } from 'react-router-dom'
+import { dataBRParaISO, getMesAno } from '@/utils/formatadores'
 
 export function useCompromisso(mes: string, ano: string, chave?: string | null) {
    const queryClient = useQueryClient()
    const queryKey = ['compromissos', chave ?? mes, ano]
-   const location = useLocation();
-   const enabled = chave
-      ? ['/compromissos', '/'].includes(location.pathname)
-      : location.pathname === '/compromissos';
 
    const { data: compromissos = [], isLoading, isError } = useQuery({
       queryKey,
       queryFn: () => listarCompromissos(mes, String(ano)),
-      staleTime: Infinity,
-      enabled
+      staleTime: Infinity
+   })
+
+   const { data: compromissosAlerta = [] } = useQuery({
+      queryKey,
+      queryFn: () => listarCompromissos(mes, String(ano)),
+      staleTime: Infinity
    })
 
    const criarMutation = useMutation({
@@ -35,22 +35,17 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
          meses?: number
       }) =>
          criarCompromisso(novoCompromisso),
-      onSuccess: (novoCompromisso: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            queryKey,
-            old => old ? [...old, novoCompromisso] : [novoCompromisso]
-         )
+      onSuccess: (registrosCriados: Compromisso[]) => {
+         inserirNoCache(registrosCriados)
       }
    })
 
    const criarCartaoMutation = useMutation({
       mutationFn: (novoCompromisso: Omit<Compromisso, 'rowIndex'>) =>
          criarCartao(novoCompromisso),
-      onSuccess: (novoCompromisso: Compromisso) => {
-         queryClient.setQueryData<Compromisso[]>(
-            queryKey,
-            old => old ? [...old, novoCompromisso] : [novoCompromisso]
-         )
+
+      onSuccess: (registrosCriados: Compromisso[]) => {
+         inserirNoCache(registrosCriados)
       }
    })
 
@@ -109,15 +104,31 @@ export function useCompromisso(mes: string, ano: string, chave?: string | null) 
       }
    })
 
+   function inserirNoCache(registros: Compromisso[]) {
+      registros.forEach(registro => {
+         const { mes, ano } = getMesAno(registro.dataVencimento)
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', mes, ano],
+            old => old ? [...old, registro] : [registro]
+         )
+
+         queryClient.setQueryData<Compromisso[]>(
+            ['compromissos', 'alertas', ano],
+            old => old ? [...old, registro] : [registro]
+         )
+      })
+   }
+
    return {
       compromissos,
+      compromissosAlerta,
       isLoading,
       isError,
       criar: criarMutation.mutateAsync,
       criarCartao: criarCartaoMutation.mutateAsync,
       atualizar: atualizarMutation.mutateAsync,
       excluir: excluirMutation.mutateAsync,
-      isSalvando:/* criarMutation.isPending || */atualizarMutation.isPending,
+      isSalvando: criarMutation.isPending || criarCartaoMutation.isPending || atualizarMutation.isPending,
       isExcluindo: excluirMutation.isPending
    }
 }

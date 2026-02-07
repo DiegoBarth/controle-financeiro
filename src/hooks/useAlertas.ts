@@ -10,12 +10,13 @@ function zerarHora(d: Date) {
 
 export function useAlertas() {
    const { ano } = usePeriodo();
-   const { compromissos } = useCompromisso('all', String(ano), 'alertas')
+   const { compromissosAlerta } = useCompromisso('all', String(ano), 'alertas')
 
    return useMemo(() => {
       const hoje = zerarHora(new Date());
 
-      const compromissosPendentes = compromissos.filter(c => !c.dataPagamento);
+<<<<<<< HEAD
+      const compromissosPendentes = compromissosAlerta.filter(c => !c.dataPagamento);
 
       const vencidos = compromissosPendentes.filter(c => {
          const [d, m, a] = c.dataVencimento.split('/').map(Number);
@@ -50,5 +51,4 @@ export function useAlertas() {
          hoje: vencendoHoje,
          semana: vencendoSemana
       };
-   }, [compromissos]);
-}
+

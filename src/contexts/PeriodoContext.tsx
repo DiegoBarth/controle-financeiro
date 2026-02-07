@@ -1,7 +1,15 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { ResumoCompleto } from '@/types/ResumoCompleto';
+import type { Receita } from '@/types/Receita';
+import type { Gasto } from '@/types/Gasto';
+import type { Compromisso } from '@/types/Compromisso';
+import type { Dashboard } from '@/types/Dashboard';
 import { useResumo } from '@/hooks/useResumo';
+import { useReceita } from '@/hooks/useReceita';
+import { useGasto } from '@/hooks/useGasto';
+import { useCompromisso } from '@/hooks/useCompromisso';
+import { useDashboard } from '@/hooks/useDashboard';
 
 interface PeriodoContextType {
    mes: string;
@@ -10,28 +18,38 @@ interface PeriodoContextType {
    setAno: (ano: number) => void;
 
    resumo: ResumoCompleto | null;
+   receitas: Receita[] | null;
+   gastos: Gasto[] | null;
+   compromissos: Compromisso[] | null;
+   compromissosAlerta: Compromisso[] | null;
+   dashboard: Dashboard | null
    isLoading: boolean;
 }
 
 export const PeriodoContext = createContext<PeriodoContextType>({
-   mes: '',
+   mes: String(new Date().getMonth() + 1),
    setMes: () => { },
-   ano: 0,
+   ano: new Date().getFullYear(),
    setAno: () => { },
    resumo: null,
+   receitas: null,
+   gastos: null,
+   compromissos: null,
+   compromissosAlerta: null,
+   dashboard: { saldoMensal: [], topCategorias: [], resumoCartoes: [] },
    isLoading: false
 });
 
-   function getPeriodoInicial() {
-      const salvo = sessionStorage.getItem('periodo');
-      if (salvo) return JSON.parse(salvo);
+function getPeriodoInicial() {
+   const salvo = sessionStorage.getItem('periodo');
+   if (salvo) return JSON.parse(salvo);
 
-      const hoje = new Date();
-      return {
-         mes: String(hoje.getMonth() + 1),
-         ano: hoje.getFullYear()
-      };
-   }
+   const hoje = new Date();
+   return {
+      mes: String(hoje.getMonth() + 1),
+      ano: hoje.getFullYear()
+   };
+}
 
 export function PeriodoProvider({ children }: { children: ReactNode }) {
    const periodoInicial = getPeriodoInicial();
@@ -40,6 +58,11 @@ export function PeriodoProvider({ children }: { children: ReactNode }) {
    const [ano, setAno] = useState<number>(periodoInicial.ano);
 
    const { resumo, isLoading } = useResumo(mes, String(ano))
+   const { receitas } = useReceita(mes, String(ano))
+   const { gastos } = useGasto(mes, String(ano))
+   const { compromissos } = useCompromisso(mes, String(ano))
+   const { compromissosAlerta } = useCompromisso('all', String(ano), 'alertas')
+   const { dashboard } = useDashboard(mes, String(ano))
 
    useEffect(() => {
       sessionStorage.setItem(
@@ -56,6 +79,11 @@ export function PeriodoProvider({ children }: { children: ReactNode }) {
             ano,
             setAno,
             resumo,
+            receitas,
+            gastos,
+            compromissos,
+            compromissosAlerta,
+            dashboard,
             isLoading
          }}
       >

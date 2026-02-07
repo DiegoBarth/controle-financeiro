@@ -12,6 +12,6 @@ export interface Compromisso {
    dataPagamento?: string;
 
    cartao?: string;
-   parcelas?: number;
+   parcela?: number;
    totalParcelas?: number;
 }
