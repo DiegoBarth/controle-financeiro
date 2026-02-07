@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Cartao } from '@/types/Dashboard'
 import { numeroParaMoeda } from '@/utils/formatadores'
-import { BASE_PATH } from '@/config/constants'
+import { BASE_PATH, SWIPE_MIN_DISTANCE_PX } from '@/config/constants'
 
 interface Props {
    cartoes: Cartao[]
@@ -11,8 +11,6 @@ export function Cartoes({ cartoes }: Props) {
    const [ativo, setAtivo] = useState(0)
    const [startX, setStartX] = useState<number | null>(null)
    const [isDragging, setIsDragging] = useState(false)
-
-   const minSwipeDistance = 50
 
    if (!cartoes.length) return null
 
@@ -57,7 +55,7 @@ export function Cartoes({ cartoes }: Props) {
 
       const diff = startX - clientX
 
-      if (Math.abs(diff) > minSwipeDistance) {
+      if (Math.abs(diff) > SWIPE_MIN_DISTANCE_PX) {
          if (diff > 0 && ativo < cartoes.length - 1) {
             setAtivo(prev => prev + 1)
             handleEnd()

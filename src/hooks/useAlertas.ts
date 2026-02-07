@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ALERTA_SEMANA_DIAS, MS_PER_DAY } from '@/config/constants';
 import { usePeriodo } from '@/contexts/PeriodoContext';
 import { useCompromisso } from '@/hooks/useCompromisso';
 
@@ -22,7 +23,7 @@ export function useAlertas() {
          const data = zerarHora(new Date(a, m - 1, d));
 
          const diffDias = Math.ceil(
-            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
+            (data.getTime() - hoje.getTime()) / MS_PER_DAY
          );
 
          return diffDias < 0;
@@ -39,10 +40,10 @@ export function useAlertas() {
          const data = zerarHora(new Date(a, m - 1, d));
 
          const diffDias = Math.ceil(
-            (data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
+            (data.getTime() - hoje.getTime()) / MS_PER_DAY
          );
 
-         return diffDias > 0 && diffDias <= 7;
+         return diffDias > 0 && diffDias <= ALERTA_SEMANA_DIAS;
       });
 
       return {
